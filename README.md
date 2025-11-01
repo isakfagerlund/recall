@@ -1,50 +1,117 @@
-# Welcome to your Expo app 👋
+# Recall - Contact Notes App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Recall is an iOS app that helps you remember important details about the people in your life by allowing you to take notes on your contacts.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Access iOS Contacts**: Read contacts directly from your device (synced via iCloud)
+- **Take Notes**: Write and save notes for any contact
+- **Search Contacts**: Quickly find contacts with built-in search
+- **View All Notes**: Browse all your notes in one place
+- **Local Storage**: All notes are stored locally on your device using SQLite
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- **React Native** with **Expo SDK 54**
+- **Expo Router** for file-based navigation
+- **expo-contacts** for iOS Contacts access
+- **expo-sqlite** for local database storage
+- **TypeScript** for type safety
 
-   ```bash
-   npx expo start
-   ```
+## Architecture (V0 - Local-Only)
 
-In the output, you'll find options to open the app in a
+### Data Strategy
+1. **Contacts**: Read-only access from iOS CNContactStore (iCloud already syncs)
+2. **Notes**: Stored locally in SQLite database
+3. **No Sync**: Local device only (sync can be added later)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+### Database Schema
+```sql
+CREATE TABLE notes (
+  id TEXT PRIMARY KEY,
+  contactId TEXT NOT NULL,
+  content TEXT NOT NULL,
+  createdAt INTEGER NOT NULL,
+  updatedAt INTEGER NOT NULL
+);
+CREATE INDEX idx_contactId ON notes(contactId);
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Project Structure
 
-## Learn more
+```
+├── app/
+│   ├── (tabs)/
+│   │   ├── index.tsx          # Contacts list screen
+│   │   └── explore.tsx        # All notes screen
+│   ├── contact/
+│   │   └── [id].tsx          # Contact detail + notes editor
+│   └── _layout.tsx           # Root layout with navigation
+├── services/
+│   ├── contacts.ts           # iOS Contacts API service
+│   └── database.ts           # SQLite database service
+├── types/
+│   └── index.ts              # TypeScript type definitions
+├── components/               # Reusable UI components
+└── constants/
+    └── theme.ts              # App theme and colors
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Getting Started
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Prerequisites
+- Node.js 18+
+- iOS Simulator or iOS device
+- Expo CLI
 
-## Join the community
+### Installation
 
-Join our community of developers creating universal apps.
+1. Install dependencies:
+```bash
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+2. Start the development server:
+```bash
+npm start
+```
+
+3. Run on iOS:
+```bash
+npm run ios
+```
+
+Or press `i` in the terminal after running `npm start`.
+
+## Permissions
+
+The app requires the following iOS permission:
+- **Contacts** (`NSContactsUsageDescription`): To read your contacts and help you take notes about them
+
+Permission is requested on first launch.
+
+## Future Enhancements
+
+### Sync Options
+- **CloudKit** (iOS-only): Native iCloud sync for Apple ecosystem
+- **Supabase/Backend** (Cross-platform): For iOS + Android support
+
+### Features
+- Rich text notes with formatting
+- Tags and categories
+- Reminders and notifications
+- Export functionality
+- Note attachments (photos, files)
+- Note sharing
+
+## Development Commands
+
+- `npm start` - Start Expo development server
+- `npm run ios` - Run on iOS simulator
+- `npm run android` - Run on Android emulator
+- `npm run web` - Run in web browser
+- `npm run lint` - Run ESLint
+
+## License
+
+Private project

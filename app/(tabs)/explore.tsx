@@ -1,112 +1,194 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { ContactNote } from '@/types';
+import { getAllNotes } from '@/services/database';
+import { getContactById } from '@/services/contacts';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
+interface NoteWithContactInfo extends ContactNote {
+  contactName?: string;
+}
+
+export default function NotesScreen() {
+  const [notes, setNotes] = useState<NoteWithContactInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const colorScheme = useColorScheme();
+
+  useFocusEffect(
+    useCallback(() => {
+      loadNotes();
+    }, [])
+  );
+
+  async function loadNotes() {
+    try {
+      setLoading(true);
+      const allNotes = await getAllNotes();
+
+      // Enrich notes with contact names
+      const notesWithContactInfo = await Promise.all(
+        allNotes.map(async (note) => {
+          try {
+            const contact = await getContactById(note.contactId);
+            return {
+              ...note,
+              contactName: contact?.name || 'Unknown Contact',
+            };
+          } catch {
+            return {
+              ...note,
+              contactName: 'Unknown Contact',
+            };
+          }
+        })
+      );
+
+      setNotes(notesWithContactInfo);
+    } catch (error) {
+      console.error('Failed to load notes:', error);
+      Alert.alert('Error', 'Failed to load notes. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleNotePress(note: NoteWithContactInfo) {
+    router.push(`/contact/${note.contactId}` as any);
+  }
+
+  function renderNote({ item }: { item: NoteWithContactInfo }) {
+    const preview = item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '');
+    const date = new Date(item.updatedAt);
+    const formattedDate = date.toLocaleDateString();
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.noteItem,
+          { borderBottomColor: Colors[colorScheme ?? 'light'].border },
+        ]}
+        onPress={() => handleNotePress(item)}>
+        <View style={styles.noteHeader}>
+          <ThemedText style={styles.contactName}>{item.contactName}</ThemedText>
+          <ThemedText style={styles.noteDate}>{formattedDate}</ThemedText>
+        </View>
+        <ThemedText style={styles.notePreview} numberOfLines={2}>
+          {preview}
         </ThemedText>
+      </TouchableOpacity>
+    );
+  }
+
+  if (loading) {
+    return (
+      <ThemedView style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].tint} />
+        <ThemedText style={styles.loadingText}>Loading notes...</ThemedText>
       </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+    );
+  }
+
+  return (
+    <ThemedView style={styles.container}>
+      <View style={styles.header}>
+        <ThemedText type="title" style={styles.title}>
+          All Notes
         </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
+        <ThemedText style={styles.subtitle}>
+          {notes.length} {notes.length === 1 ? 'note' : 'notes'}
         </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
+      </View>
+      <FlatList
+        data={notes}
+        renderItem={renderNote}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <ThemedView style={styles.centered}>
+            <ThemedText style={styles.emptyText}>No notes yet</ThemedText>
+            <ThemedText style={styles.emptySubtext}>
+              Tap on a contact to add your first note
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </ThemedView>
+        }
+      />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  header: {
+    padding: 16,
+    paddingTop: 60,
+  },
+  title: {
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    opacity: 0.6,
+  },
+  listContent: {
+    flexGrow: 1,
+  },
+  noteItem: {
+    padding: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  noteHeader: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  contactName: {
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+  },
+  noteDate: {
+    fontSize: 12,
+    opacity: 0.5,
+    marginLeft: 8,
+  },
+  notePreview: {
+    fontSize: 14,
+    opacity: 0.7,
+    lineHeight: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.6,
   },
 });
