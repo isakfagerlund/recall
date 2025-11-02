@@ -1,19 +1,33 @@
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { createStyles } from '@/theme/styles';
+import { Pressable, StyleSheet } from 'react-native';
+import { spacing } from '@/constants/spacing';
+import { typography } from '@/constants/typography';
 
 export default function TabOneScreen() {
   return (
     <View style={createStyles.flexCenter}>
-      <Text style={createStyles.textTitle}>Tab One</Text>
-      <Link href="/modal">Open</Link>
-      <View
-        style={createStyles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <Text style={createStyles.textTitle}>Home page</Text>
+      <Pressable style={styles.button} onPress={() => router.push('/modal')}>
+        <Text style={createStyles.buttonText}>Open</Text>
+      </Pressable>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: '#4f46e5',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: typography.sizes.base,
+    fontWeight: typography.weights.semibold,
+  },
+});
