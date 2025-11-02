@@ -4,6 +4,7 @@ import { createStyles } from '@/theme/styles';
 import { Pressable, StyleSheet } from 'react-native';
 import { spacing } from '@/constants/spacing';
 import { typography } from '@/constants/typography';
+import InlineAudioRecorder from '@/components/InlineAudioRecorder';
 
 export default function TabOneScreen() {
   return (
@@ -12,6 +13,7 @@ export default function TabOneScreen() {
       <Pressable style={styles.button} onPress={() => router.push('/modal')}>
         <Text style={createStyles.buttonText}>Open</Text>
       </Pressable>
+      <InlineAudioRecorder />
     </View>
   );
 }
