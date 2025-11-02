@@ -1,35 +1,17 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { NativeTabs, Icon, Label } from 'expo-router/unstable-native-tabs';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Contacts',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.2.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Notes',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="note.text" color={color} />,
-        }}
-      />
-    </Tabs>
+    <NativeTabs>
+      <NativeTabs.Trigger name="index">
+        <Icon sf={{ default: 'house', selected: 'house.fill' }} />
+        <Label>Home</Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="two">
+        <Icon sf={{ default: 'person', selected: 'person.fill' }} />
+        <Label>Contacts</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }
