@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.isakfagerund.recall",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "QAK9SJQ642"
     },
     "android": {
       "adaptiveIcon": {
