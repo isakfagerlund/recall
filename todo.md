@@ -8,5 +8,6 @@
 
 
 ## Others
+[] Find domain. Ideas: kanner.app, senast.app
 [] Create simple marketing page for the app
 [] Release to store
