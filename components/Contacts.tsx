@@ -26,7 +26,6 @@ export default function ContactsComponent() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Contacts Module Example</Text>
       {contacts.map((contact, i) => (
         <Text key={`${contact.name} ${i}`}>{contact.name}</Text>
       ))}
@@ -36,8 +35,8 @@ export default function ContactsComponent() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
     padding: spacing.xl,
+    gap: spacing.sm,
   },
   title: {
     fontSize: typography.sizes.lg,

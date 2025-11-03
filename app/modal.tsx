@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import { createStyles } from '@/theme/styles';
 

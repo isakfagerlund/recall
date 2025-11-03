@@ -1,105 +1,58 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import {
   AudioModule,
   useAudioRecorder,
   useAudioRecorderState,
   RecordingPresets,
+  setAudioModeAsync,
+  useAudioPlayer,
 } from 'expo-audio';
-import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
+import { createStyles } from '@/theme/styles';
 
 export default function InlineAudioRecorder() {
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const state = useAudioRecorderState(recorder);
+  const player = useAudioPlayer();
+  const [recording, setRecording] = useState<string | null>();
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder);
 
-  const [uri, setUri] = useState<string | null>(null);
+  const record = async () => {
+    await audioRecorder.prepareToRecordAsync();
+    audioRecorder.record();
+  };
+
+  const stopRecording = async () => {
+    // The recording will be available on `audioRecorder.uri`.
+    await audioRecorder.stop();
+    setRecording(audioRecorder.uri);
+
+    if (audioRecorder.uri) {
+      player.replace(audioRecorder.uri);
+      player.play();
+    }
+  };
 
   useEffect(() => {
     (async () => {
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
-        console.warn('Microphone permission not granted');
+        Alert.alert('Permission to access microphone was denied');
       }
-      await AudioModule.setAudioModeAsync({
-        allowsRecording: true,
+
+      setAudioModeAsync({
         playsInSilentMode: true,
+        allowsRecording: true,
       });
     })();
   }, []);
 
-  const handleStart = async () => {
-    try {
-      await recorder.prepareToRecordAsync();
-      recorder.record();
-      setUri(null);
-    } catch (err) {
-      console.error('Failed to start recording', err);
-    }
-  };
-
-  const handleStop = async () => {
-    try {
-      await recorder.stop();
-      const status = recorder.getStatus();
-      setUri(status.url ?? null);
-    } catch (err) {
-      console.error('Failed to stop recording', err);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!uri) return;
-
-    try {
-      // Native (iOS/Android): use system share sheet (lets user save to Files/Drive, etc.)
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(uri, {
-          dialogTitle: 'Export recording',
-          mimeType: 'audio/m4a',
-          UTI: 'com.apple.m4a-audio', // iOS hint
-        });
-        return;
-      }
-
-      // Fallback if Sharing isn't available (very rare):
-      // copy into app's documents so at least it's persisted,
-      // then tell user where it is.
-      const dest = FileSystem.Directory + 'recording.m4a';
-      await FileSystem.copyAsync({ from: uri, to: dest });
-      Alert.alert('Saved', `Saved to app documents:\n${dest}`);
-    } catch (e) {
-      console.error('Download/export failed', e);
-      Alert.alert('Error', 'Could not export the recording.');
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Button
-        title={state.isRecording ? 'Stop Recording' : 'Start Recording'}
-        onPress={state.isRecording ? handleStop : handleStart}
+        title={recorderState.isRecording ? 'Stop Recording' : 'Start Recording'}
+        onPress={recorderState.isRecording ? stopRecording : record}
       />
-
-      {uri && (
-        <TouchableOpacity onPress={handleDownload} activeOpacity={0.7}>
-          <Text style={styles.link}>
-            Recorded URI (tap to {Platform.OS === 'web' ? 'download' : 'export'}
-            ):
-            {'\n'}
-            {uri}
-          </Text>
-        </TouchableOpacity>
-      )}
+      <Text style={createStyles.buttonPrimary}>Recording: {recording}</Text>
     </View>
   );
 }
