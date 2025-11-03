@@ -1,6 +1,12 @@
-import { View, Text, Button, Pressable, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import { apple } from '@react-native-ai/apple';
-import { generateObject, generateText } from 'ai';
+import { generateObject } from 'ai';
 import { useState } from 'react';
 import { createStyles } from '@/theme/styles';
 import z from 'zod/v4';
@@ -11,42 +17,103 @@ const personSchema = z.object({
   extras: z.string(),
 });
 
+type Person = z.infer<typeof personSchema>;
+
 export default function PersonForm() {
-  // const [generatedText, setGeneratedText] = useState();
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [generatedPerson, setGeneratedPerson] = useState<Person | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePersonSubmit = async (personSummary: string) => {
+  const handlePersonSubmit = async () => {
+    if (!input.trim()) {
+      setError('Please enter a person description');
+      return;
+    }
+
     setLoading(true);
-    const result = await generateObject({
-      model: apple(),
-      prompt: `
-      Summarize the person from the input in a clean structure
+    setError(null);
 
-      Make it short and concise.
-      
-      Input: ${personSummary}
-      `,
-      schema: personSchema,
-    });
+    try {
+      const result = await generateObject({
+        model: apple(),
+        prompt: `
+        Summarize the person from the input in a clean structure
 
-    console.log(result.object);
-    setLoading(false);
+        Make it short and concise.
+
+        Input: ${input}
+        `,
+        schema: personSchema,
+      });
+
+      setGeneratedPerson(result.object);
+      setInput('');
+      console.log(result.object);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to generate person data';
+      setError(message);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View>
-      <Text>Form here</Text>
-      <Pressable
-        style={createStyles.buttonPrimary}
-        onPress={() =>
-          handlePersonSubmit(
-            'uhh okay so like… craig right, craig umm he’s that guy who’s super into cats — like not just normal cats but like he follows cat accounts, you know? — and then he’s always talking about his board game nights like it’s the olympics or something, and uh yeah he also, apparently, runs marathons which is crazy because like… have you seen the size of his forehead? i swear you could project the race map on it. anyway yeah that’s craig, cats, cardboard, cardio, and a comically large cranial situation.'
-          )
-        }
-      >
-        <Text>Generate</Text>
-      </Pressable>
-      <Text>{loading ? 'Loading...' : ''}</Text>
+      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
+        <TextInput
+          style={{
+            flex: 1,
+            borderWidth: 1,
+            borderColor: '#e5e7eb',
+            borderRadius: 8,
+            padding: 12,
+            fontSize: 16,
+            minHeight: 100,
+          }}
+          placeholder="Describe the person..."
+          placeholderTextColor="#9ca3af"
+          value={input}
+          onChangeText={setInput}
+          editable={!loading}
+          multiline
+          numberOfLines={4}
+        />
+
+        <Pressable
+          style={[
+            createStyles.buttonPrimary,
+            {
+              borderRadius: 50,
+              width: 50,
+              height: 50,
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+            },
+          ]}
+          onPress={handlePersonSubmit}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={{ fontSize: 24 }}>✓</Text>
+          )}
+        </Pressable>
+      </View>
+
+      {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
+
+      {generatedPerson && (
+        <View style={{ marginTop: 20 }}>
+          <Text>Name: {generatedPerson.name}</Text>
+          <Text>Interests: {generatedPerson.interests.join(', ')}</Text>
+          <Text>Extras: {generatedPerson.extras}</Text>
+        </View>
+      )}
     </View>
   );
 }
