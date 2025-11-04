@@ -55,10 +55,16 @@ export default function PersonForm() {
 
   return (
     <View>
-      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: 12,
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
         <TextInput
           style={{
-            flex: 1,
             borderWidth: 1,
             borderColor: '#e5e7eb',
             borderRadius: 8,
