@@ -9,15 +9,7 @@ import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
 import { useState } from 'react';
 import { createStyles } from '@/theme/styles';
-import z from 'zod/v4';
-
-const personSchema = z.object({
-  name: z.string(),
-  interests: z.array(z.string()),
-  extras: z.string(),
-});
-
-type Person = z.infer<typeof personSchema>;
+import { personSchema, type Person } from '@/types/person';
 
 export default function PersonForm() {
   const [input, setInput] = useState('');
@@ -25,7 +17,7 @@ export default function PersonForm() {
   const [generatedPerson, setGeneratedPerson] = useState<Person | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handlePersonSubmit = async () => {
+  const handlePersonSubmit = async (): Promise<void> => {
     if (!input.trim()) {
       setError('Please enter a person description');
       return;
@@ -35,7 +27,7 @@ export default function PersonForm() {
     setError(null);
 
     try {
-      const result = await generateObject({
+      const result = await generateObject<typeof personSchema>({
         model: apple(),
         prompt: `
         Summarize the person from the input in a clean structure
@@ -47,14 +39,15 @@ export default function PersonForm() {
         schema: personSchema,
       });
 
-      setGeneratedPerson(result.object);
+      const person: Person = result.object;
+      setGeneratedPerson(person);
       setInput('');
-      console.log(result.object);
+      console.log('Generated person:', person);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to generate person data';
       setError(message);
-      console.error('Error:', err);
+      console.error('Error generating person:', err);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 ## App building
 [x] Create working example of generating structured text from input 
-[] fix typing and data flow when generating the text
+[x] fix typing and data flow when generating the text
 [] create the nice looking input for name. Input + native check button
 [] Save person in the database with date
 [] Ask for Calendar access to match date added with calendar event
