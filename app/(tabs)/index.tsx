@@ -9,14 +9,14 @@ import {
   VStack,
 } from '@expo/ui/swift-ui';
 
-import { format, intlFormat } from 'date-fns';
+import { format } from 'date-fns';
 
 import React, { useRef, useState } from 'react';
 import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
 import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
 import { generatePersonSchema, Person } from '@/types/person';
-import { Text } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import * as Crypto from 'expo-crypto';
 
 export default function TabOneScreen() {
@@ -42,6 +42,8 @@ export default function TabOneScreen() {
       
       Generate a well structured sentence in the description field from all the different inputs you get. Don not include the name in the description field.
       
+      If you cant figure out a description just pass an empty string. do not make up info from data that is not passed. I don't want any description that is not based on the input
+
       Input:
       ${value}
       `,
@@ -76,10 +78,11 @@ export default function TabOneScreen() {
         paddingTop: 72,
         paddingBottom: 124,
         paddingHorizontal: 18,
+        gap: 18,
       }}
     >
-      {people && <RecentPeople people={people} />}
-      <Host matchContents style={{ width: 300, height: 300 }}>
+      <ScrollView>{people && <RecentPeople people={people} />}</ScrollView>
+      <Host matchContents style={{ width: '100%', height: 300 }}>
         <HStack spacing={12}>
           <VStack
             modifiers={[
