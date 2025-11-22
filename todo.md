@@ -2,8 +2,9 @@
 [x] Create working example of generating structured text from input 
 [x] fix typing and data flow when generating the text
 [x] create the nice looking input for name. Input + native check button
-[] Setup sqlite and persist data https://orm.drizzle.team/docs/connect-expo-sqlite
-[] Save person in the database with date
+[x] Setup sqlite and persist data https://orm.drizzle.team/docs/connect-expo-sqlite
+[x] Save person in the database with date
+[] Move backend part to a simple Hono API and host it on cloudflare
 [] Ask for Calendar access to match date added with calendar event
 [] Create a recent added list of contacts on the top of the home screen. I'm thinking a rolling list of 3 items
 [] Design a nice contacts page
