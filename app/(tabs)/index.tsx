@@ -16,7 +16,13 @@ import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
 import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
 import { generatePersonSchema, Person } from '@/types/person';
-import { ScrollView, Text } from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+} from 'react-native';
 import * as Crypto from 'expo-crypto';
 
 export default function TabOneScreen() {
@@ -57,6 +63,7 @@ export default function TabOneScreen() {
       };
       setPeople((prev) => (prev ? [...prev, person] : [person]));
       setValue('');
+      Keyboard.dismiss();
       console.log('Generated person:', person);
     } catch (err) {
       const message =
@@ -69,53 +76,61 @@ export default function TabOneScreen() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#D9D9D9',
-        paddingTop: 72,
-        paddingBottom: 124,
-        paddingHorizontal: 18,
-        gap: 18,
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#D9D9D9' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
     >
-      <ScrollView>{people && <RecentPeople people={people} />}</ScrollView>
-      <Host matchContents style={{ width: '100%', height: 300 }}>
-        <HStack spacing={12}>
-          <VStack
-            modifiers={[
-              glassEffect({
-                shape: 'capsule',
-                glass: {
-                  interactive: true,
-                  variant: 'clear',
-                },
-              }),
-            ]}
-          >
-            <TextField
-              ref={fieldRef}
-              modifiers={[padding({ horizontal: 12, vertical: 6 })]}
-              autocorrection={false}
-              onChangeText={setValue}
-            />
-          </VStack>
-          <Button
-            systemImage={isLoading ? undefined : 'checkmark'}
-            variant="glassProminent"
-            onPress={async () => {
-              await handlePersonSubmit();
-              setValue('');
-              fieldRef.current?.setText('');
-            }}
-          >
-            <CircularProgress color="#fff" />
-          </Button>
-        </HStack>
-      </Host>
-    </View>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: '#D9D9D9',
+          paddingTop: 72,
+          paddingBottom: 124,
+          paddingHorizontal: 18,
+          gap: 18,
+        }}
+      >
+        <ScrollView keyboardShouldPersistTaps="handled">
+          {people && <RecentPeople people={people} />}
+        </ScrollView>
+        <Host matchContents style={{ width: '100%', height: 300 }}>
+          <HStack spacing={12}>
+            <VStack
+              modifiers={[
+                glassEffect({
+                  shape: 'capsule',
+                  glass: {
+                    interactive: true,
+                    variant: 'clear',
+                  },
+                }),
+              ]}
+            >
+              <TextField
+                ref={fieldRef}
+                modifiers={[padding({ horizontal: 12, vertical: 6 })]}
+                autocorrection={false}
+                onChangeText={setValue}
+              />
+            </VStack>
+            <Button
+              systemImage={isLoading ? undefined : 'checkmark'}
+              variant="glassProminent"
+              onPress={async () => {
+                await handlePersonSubmit();
+                setValue('');
+                fieldRef.current?.setText('');
+              }}
+            >
+              <CircularProgress color="#fff" />
+            </Button>
+          </HStack>
+        </Host>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
