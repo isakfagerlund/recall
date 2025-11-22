@@ -19,11 +19,10 @@ export default function TabsLayout() {
         <Icon sf={{ default: 'house', selected: 'house.fill' }} />
         <Label>Home</Label>
       </NativeTabs.Trigger>
-      {/* 
       <NativeTabs.Trigger name="two">
-        <Icon sf={{ default: 'person', selected: 'person.fill' }} />
-        <Label>Contacts</Label>
-      </NativeTabs.Trigger> */}
+        <Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
+        <Label>Settings</Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

@@ -142,7 +142,7 @@ export default function TabOneScreen() {
           paddingTop: 72,
           paddingBottom: 124,
           paddingHorizontal: 18,
-          gap: 18,
+        gap: 18,
         }}
       >
         <ScrollView keyboardShouldPersistTaps="handled">
@@ -188,7 +188,7 @@ export default function TabOneScreen() {
 
 const RecentPeople = ({ people }: { people: Person[] }) => {
   return (
-    <View style={{ backgroundColor: '#D9D9D9', gap: 10 }}>
+    <View style={{ backgroundColor: '#D9D9D9', gap: 10, width: '100%' }}>
       {people.map((person) => (
         <PersonCard key={person.id} person={person} />
       ))}
@@ -252,6 +252,7 @@ const PersonCard = ({ person }: { person: Person }) => {
       onLongPress={handleLongPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
+      style={{ width: '100%' }}
     >
       <Animated.View
         style={[
@@ -260,6 +261,7 @@ const PersonCard = ({ person }: { person: Person }) => {
             padding: 12,
             borderRadius: 18,
             backgroundColor,
+            width: '100%',
           },
           animatedStyle,
         ]}
