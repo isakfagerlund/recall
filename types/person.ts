@@ -11,6 +11,7 @@ export const personSchema = z.object({
   description: z.string(),
   createdAt: z.date(),
   updatedAt: z.date().optional(),
+  deletedAt: z.date().optional(),
 });
 
 export type Person = z.infer<typeof personSchema>;

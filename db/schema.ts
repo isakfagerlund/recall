@@ -8,10 +8,12 @@ export const people = sqliteTable(
     description: text('description'),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     updatedAt: integer('updated_at', { mode: 'timestamp' }),
+    deletedAt: integer('deleted_at', { mode: 'timestamp' }),
   },
   (table) => ({
     createdAtIdx: index('people_created_at_idx').on(table.createdAt),
     nameIdx: index('people_name_idx').on(table.name),
+    deletedAtIdx: index('people_deleted_at_idx').on(table.deletedAt),
   })
 );
 

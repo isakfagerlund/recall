@@ -1,4 +1,4 @@
-import { View } from '@/components/Themed';
+import { View, useThemeColor } from '@/components/Themed';
 import {
   Button,
   CircularProgress,
@@ -17,17 +17,25 @@ import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
 import { generatePersonSchema, Person } from '@/types/person';
 import {
+  ActionSheetIOS,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 import * as Crypto from 'expo-crypto';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '@/db';
 import { people as peopleTable, PersonRow } from '@/db/schema';
-import { desc } from 'drizzle-orm';
+import { desc, eq, isNull } from 'drizzle-orm';
 
 export default function TabOneScreen() {
   const fieldRef = useRef<TextFieldRef>(null);
@@ -37,8 +45,13 @@ export default function TabOneScreen() {
 
   // Use Live Query to reactively fetch people from database
   // Drizzle's mode: 'timestamp' automatically converts timestamps to Date objects
+  // Filter out soft-deleted persons
   const { data: peopleData } = useLiveQuery(
-    db.select().from(peopleTable).orderBy(desc(peopleTable.createdAt))
+    db
+      .select()
+      .from(peopleTable)
+      .where(isNull(peopleTable.deletedAt))
+      .orderBy(desc(peopleTable.createdAt))
   );
 
   // Convert database rows to Person type
@@ -55,6 +68,12 @@ export default function TabOneScreen() {
           ? row.updatedAt
           : row.updatedAt
           ? new Date(row.updatedAt)
+          : undefined,
+      deletedAt:
+        row.deletedAt instanceof Date
+          ? row.deletedAt
+          : row.deletedAt
+          ? new Date(row.deletedAt)
           : undefined,
     })) ?? [];
 
@@ -178,19 +197,95 @@ const RecentPeople = ({ people }: { people: Person[] }) => {
 };
 
 const PersonCard = ({ person }: { person: Person }) => {
+  const scale = useSharedValue(1);
+  const backgroundColor = useThemeColor({}, 'background');
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
+  const handleLongPress = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Delete'],
+          destructiveButtonIndex: 1,
+          cancelButtonIndex: 0,
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) {
+            handleDeletePerson(person.id);
+          }
+        }
+      );
+    } else {
+      Alert.alert(
+        'Delete Person',
+        `Are you sure you want to delete ${person.name}?`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => handleDeletePerson(person.id),
+          },
+        ]
+      );
+    }
+  };
+
+  const handlePressIn = () => {
+    scale.value = withTiming(0.95, { duration: 400 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withTiming(1, { duration: 400 });
+  };
+
   return (
-    <View
-      style={{
-        gap: 6,
-        padding: 12,
-        borderRadius: 18,
-      }}
+    <Pressable
+      onLongPress={handleLongPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
     >
-      <Text style={{ fontWeight: 'bold' }}>{person.name}</Text>
-      <Text>{person.description}</Text>
-      <Text style={{ fontSize: 12 }}>
-        {format(person.createdAt, 'MMM do pp')}
-      </Text>
-    </View>
+      <Animated.View
+        style={[
+          {
+            gap: 6,
+            padding: 12,
+            borderRadius: 18,
+            backgroundColor,
+          },
+          animatedStyle,
+        ]}
+      >
+        <Text style={{ fontWeight: 'bold' }}>{person.name}</Text>
+        <Text>{person.description}</Text>
+        <Text style={{ fontSize: 12 }}>
+          {format(person.createdAt, 'MMM do pp')}
+        </Text>
+      </Animated.View>
+    </Pressable>
   );
+};
+
+const handleDeletePerson = async (personId: string): Promise<void> => {
+  try {
+    const now = new Date();
+    await db
+      .update(peopleTable)
+      .set({ deletedAt: now, updatedAt: now })
+      .where(eq(peopleTable.id, personId));
+    console.log('Soft deleted person:', personId);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'Failed to delete person';
+    console.error('Error deleting person:', err);
+    Alert.alert('Error', message);
+  }
 };
