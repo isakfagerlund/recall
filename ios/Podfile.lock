@@ -21,14 +21,10 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - EXApplication (7.0.7):
-    - ExpoModulesCore
   - EXConstants (18.0.10):
     - ExpoModulesCore
   - EXJSONUtils (0.15.0)
   - EXManifests (1.0.8):
-    - ExpoModulesCore
-  - EXNotifications (0.32.13):
     - ExpoModulesCore
   - Expo (54.0.23):
     - ExpoModulesCore
@@ -275,6 +271,8 @@ PODS:
   - ExpoSharing (14.0.7):
     - ExpoModulesCore
   - ExpoSplashScreen (31.0.10):
+    - ExpoModulesCore
+  - ExpoSQLite (16.0.9):
     - ExpoModulesCore
   - ExpoUI (0.2.0-beta.7):
     - ExpoModulesCore
@@ -2180,11 +2178,9 @@ PODS:
 
 DEPENDENCIES:
   - "AppleLLM (from `../node_modules/@react-native-ai/apple`)"
-  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
-  - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
   - expo-dev-client (from `../node_modules/expo-dev-client/ios`)
   - expo-dev-launcher (from `../node_modules/expo-dev-launcher`)
@@ -2204,6 +2200,7 @@ DEPENDENCIES:
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSharing (from `../node_modules/expo-sharing/ios`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
+  - ExpoSQLite (from `../node_modules/expo-sqlite/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
@@ -2283,16 +2280,12 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   AppleLLM:
     :path: "../node_modules/@react-native-ai/apple"
-  EXApplication:
-    :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXJSONUtils:
     :path: "../node_modules/expo-json-utils/ios"
   EXManifests:
     :path: "../node_modules/expo-manifests/ios"
-  EXNotifications:
-    :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
   expo-dev-client:
@@ -2331,6 +2324,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-sharing/ios"
   ExpoSplashScreen:
     :path: "../node_modules/expo-splash-screen/ios"
+  ExpoSQLite:
+    :path: "../node_modules/expo-sqlite/ios"
   ExpoUI:
     :path: "../node_modules/@expo/ui/ios"
   ExpoWebBrowser:
@@ -2483,11 +2478,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AppleLLM: ff10bb0e9603d952cf883228f56c56cb0a3289ad
-  EXApplication: 296622817d459f46b6c5fe8691f4aac44d2b79e7
   EXConstants: fd688cef4e401dcf798a021cfb5d87c890c30ba3
   EXJSONUtils: 1d3e4590438c3ee593684186007028a14b3686cd
   EXManifests: 224345a575fca389073c416297b6348163f28d1a
-  EXNotifications: a62e1f8e3edd258dc3b155d3caa49f32920f1c6c
   Expo: fb09185d798c2876a4c5ca89a5c6b8b72b6dbecf
   expo-dev-client: 974463bca58c100a32f099450e9413893bee3de8
   expo-dev-launcher: adcbbff3464b908458255d0fdf3e8cf79c67d614
@@ -2507,6 +2500,7 @@ SPEC CHECKSUMS:
   ExpoModulesCore: aa1a8e103d41de84baa5d7c6b98314e2230f1eef
   ExpoSharing: 032c01bb034319e2374badf082ae935be866d2e9
   ExpoSplashScreen: cbb839de72110dea1851dd3e85080b7923af2540
+  ExpoSQLite: b312b02c8b77ab55951396e6cd13992f8db9215f
   ExpoUI: b99a1d1ef5352a60bebf4f4fd3a50d2f896ae804
   ExpoWebBrowser: d04a0d6247a0bea4519fbc2ea816610019ad83e0
   EXUpdatesInterface: 5adf50cb41e079c861da6d9b4b954c3db9a50734

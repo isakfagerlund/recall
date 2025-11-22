@@ -24,13 +24,39 @@ import {
   Text,
 } from 'react-native';
 import * as Crypto from 'expo-crypto';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { db } from '@/db';
+import { people as peopleTable, PersonRow } from '@/db/schema';
+import { desc } from 'drizzle-orm';
 
 export default function TabOneScreen() {
   const fieldRef = useRef<TextFieldRef>(null);
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [people, setPeople] = useState<Person[]>();
   const [error, setError] = useState('');
+
+  // Use Live Query to reactively fetch people from database
+  // Drizzle's mode: 'timestamp' automatically converts timestamps to Date objects
+  const { data: peopleData } = useLiveQuery(
+    db.select().from(peopleTable).orderBy(desc(peopleTable.createdAt))
+  );
+
+  // Convert database rows to Person type
+  // Drizzle's mode: 'timestamp' converts timestamps to Date objects
+  const people: Person[] =
+    peopleData?.map((row: PersonRow) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description ?? '',
+      createdAt:
+        row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+      updatedAt:
+        row.updatedAt instanceof Date
+          ? row.updatedAt
+          : row.updatedAt
+          ? new Date(row.updatedAt)
+          : undefined,
+    })) ?? [];
 
   const handlePersonSubmit = async (): Promise<void> => {
     if (!value.trim()) {
@@ -39,6 +65,7 @@ export default function TabOneScreen() {
     }
 
     setIsLoading(true);
+    setError('');
 
     try {
       const result = await generateObject<typeof generatePersonSchema>({
@@ -56,15 +83,21 @@ export default function TabOneScreen() {
         schema: generatePersonSchema,
       });
 
-      const person: Person = {
-        ...result.object,
-        id: Crypto.randomUUID(),
-        createdAt: new Date(),
-      };
-      setPeople((prev) => (prev ? [...prev, person] : [person]));
+      const now = new Date();
+      const personId = Crypto.randomUUID();
+
+      // Insert into database
+      await db.insert(peopleTable).values({
+        id: personId,
+        name: result.object.name,
+        description: result.object.description || null,
+        createdAt: now,
+        updatedAt: null,
+      });
+
       setValue('');
       Keyboard.dismiss();
-      console.log('Generated person:', person);
+      console.log('Saved person to database:', personId);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to generate person data';
@@ -94,7 +127,7 @@ export default function TabOneScreen() {
         }}
       >
         <ScrollView keyboardShouldPersistTaps="handled">
-          {people && <RecentPeople people={people} />}
+          {people.length > 0 && <RecentPeople people={people} />}
         </ScrollView>
         <Host matchContents style={{ width: '100%', height: 300 }}>
           <HStack spacing={12}>

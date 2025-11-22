@@ -15,6 +15,7 @@
     "@react-navigation/native": "^7.1.8",
     "ai": "^5.0.86",
     "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.44.7",
     "expo": "~54.0.23",
     "expo-audio": "~1.0.14",
     "expo-constants": "~18.0.10",
@@ -28,6 +29,7 @@
     "expo-router": "~6.0.13",
     "expo-sharing": "~14.0.7",
     "expo-splash-screen": "~31.0.10",
+    "expo-sqlite": "~16.0.9",
     "expo-status-bar": "~3.0.8",
     "expo-web-browser": "~15.0.8",
     "react": "19.1.0",
@@ -42,6 +44,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "drizzle-kit": "^0.30.0",
     "react-test-renderer": "19.1.0",
     "typescript": "~5.9.2"
   },

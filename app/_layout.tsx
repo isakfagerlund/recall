@@ -7,9 +7,10 @@ import {
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
+import { initializeDatabase } from '@/db';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -24,18 +25,32 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
+  const [dbInitialized, setDbInitialized] = useState(false);
 
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
+  // Initialize database on app startup
   useEffect(() => {
-    if (loaded) {
+    initializeDatabase()
+      .then(() => {
+        setDbInitialized(true);
+      })
+      .catch((err) => {
+        console.error('Failed to initialize database:', err);
+        // Still allow app to continue even if DB init fails
+        setDbInitialized(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (loaded && dbInitialized) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, dbInitialized]);
 
-  if (!loaded) return null;
+  if (!loaded || !dbInitialized) return null;
 
   return <RootLayoutNav />;
 }
