@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.isakfagerund.recall",
       "icon": "./assets/images/icon.png",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCalendarsUsageDescription": "Allow $(PRODUCT_NAME) to access your calendar to associate contacts with calendar events."
       }
     },
     "android": {
@@ -33,10 +34,7 @@
         "android.permission.WRITE_CONTACTS",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.READ_CONTACTS",
-        "android.permission.WRITE_CONTACTS",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.READ_CALENDAR"
       ],
       "package": "com.isakfagerund.recall"
     },
@@ -52,6 +50,12 @@
         "expo-audio",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow $(PRODUCT_NAME) to access your calendar."
         }
       ]
     ],

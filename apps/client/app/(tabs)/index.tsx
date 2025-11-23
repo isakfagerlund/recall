@@ -16,6 +16,7 @@ import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
 import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
 import { generatePersonSchema, Person } from '@/types/person';
+import { getCurrentCalendarEvent } from '@/lib/calendar';
 import {
   ActionSheetIOS,
   Alert,
@@ -25,6 +26,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  View as RNView,
 } from 'react-native';
 import { useVoiceToText } from '@/components/useVoiceToText';
 import { KeyboardToolbar } from 'react-native-keyboard-controller';
@@ -84,6 +86,20 @@ export default function TabOneScreen() {
           : row.deletedAt
           ? new Date(row.deletedAt)
           : undefined,
+      calendarEventId: row.calendarEventId ?? undefined,
+      calendarEventTitle: row.calendarEventTitle ?? undefined,
+      calendarEventStartDate:
+        row.calendarEventStartDate instanceof Date
+          ? row.calendarEventStartDate
+          : row.calendarEventStartDate
+          ? new Date(row.calendarEventStartDate)
+          : undefined,
+      calendarEventEndDate:
+        row.calendarEventEndDate instanceof Date
+          ? row.calendarEventEndDate
+          : row.calendarEventEndDate
+          ? new Date(row.calendarEventEndDate)
+          : undefined,
     })) ?? [];
 
   const handlePersonSubmit = async (): Promise<void> => {
@@ -114,6 +130,15 @@ export default function TabOneScreen() {
       const now = new Date();
       const personId = Crypto.randomUUID();
 
+      // Try to get current calendar event (don't block if it fails)
+      let calendarEvent = null;
+      try {
+        calendarEvent = await getCurrentCalendarEvent();
+      } catch (error) {
+        // Silently fail - calendar detection is optional
+        console.log('Could not get calendar event:', error);
+      }
+
       // Insert into database
       await db.insert(peopleTable).values({
         id: personId,
@@ -121,6 +146,10 @@ export default function TabOneScreen() {
         description: result.object.description || null,
         createdAt: now,
         updatedAt: null,
+        calendarEventId: calendarEvent?.id ?? null,
+        calendarEventTitle: calendarEvent?.title ?? null,
+        calendarEventStartDate: calendarEvent?.startDate ?? null,
+        calendarEventEndDate: calendarEvent?.endDate ?? null,
       });
 
       setValue('');
@@ -320,6 +349,11 @@ const PersonCard = ({ person }: { person: Person }) => {
     scale.value = withTiming(1, { duration: 400 });
   };
 
+  const hasCalendarEvent =
+    person.calendarEventTitle &&
+    person.calendarEventStartDate &&
+    person.calendarEventEndDate;
+
   return (
     <Pressable
       onLongPress={handleLongPress}
@@ -341,7 +375,18 @@ const PersonCard = ({ person }: { person: Person }) => {
       >
         <Text style={{ fontWeight: 'bold' }}>{person.name}</Text>
         <Text>{person.description}</Text>
-        <Text style={{ fontSize: 12 }}>
+        {hasCalendarEvent && (
+          <RNView style={{ marginTop: 4, gap: 2 }}>
+            <Text style={{ fontSize: 12, opacity: 0.7 }}>
+              📅 {person.calendarEventTitle}
+            </Text>
+            <Text style={{ fontSize: 11, opacity: 0.6 }}>
+              {format(person.calendarEventStartDate, 'h:mm a')} -{' '}
+              {format(person.calendarEventEndDate, 'h:mm a')}
+            </Text>
+          </RNView>
+        )}
+        <Text style={{ fontSize: 12, opacity: 0.6 }}>
           {format(person.createdAt, 'MMM do pp')}
         </Text>
       </Animated.View>

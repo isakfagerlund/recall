@@ -1,0 +1,93 @@
+{
+  "id": "0001_add_calendar_fields",
+  "prevId": "0000_initial",
+  "version": "5",
+  "dialect": "sqlite",
+  "tables": {
+    "people": {
+      "name": "people",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "integer"
+        },
+        "synced_at": {
+          "name": "synced_at",
+          "type": "integer"
+        },
+        "sync_version": {
+          "name": "sync_version",
+          "type": "integer"
+        },
+        "calendar_event_id": {
+          "name": "calendar_event_id",
+          "type": "text"
+        },
+        "calendar_event_title": {
+          "name": "calendar_event_title",
+          "type": "text"
+        },
+        "calendar_event_start_date": {
+          "name": "calendar_event_start_date",
+          "type": "integer"
+        },
+        "calendar_event_end_date": {
+          "name": "calendar_event_end_date",
+          "type": "integer"
+        }
+      },
+      "indexes": {
+        "people_created_at_idx": {
+          "name": "people_created_at_idx",
+          "columns": ["created_at"]
+        },
+        "people_name_idx": {
+          "name": "people_name_idx",
+          "columns": ["name"]
+        },
+        "people_deleted_at_idx": {
+          "name": "people_deleted_at_idx",
+          "columns": ["deleted_at"]
+        },
+        "people_synced_at_idx": {
+          "name": "people_synced_at_idx",
+          "columns": ["synced_at"]
+        },
+        "people_calendar_event_id_idx": {
+          "name": "people_calendar_event_id_idx",
+          "columns": ["calendar_event_id"]
+        }
+      }
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

@@ -12,6 +12,10 @@ export const personSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date().optional(),
   deletedAt: z.date().optional(),
+  calendarEventId: z.string().optional(),
+  calendarEventTitle: z.string().optional(),
+  calendarEventStartDate: z.date().optional(),
+  calendarEventEndDate: z.date().optional(),
 });
 
 export type Person = z.infer<typeof personSchema>;
