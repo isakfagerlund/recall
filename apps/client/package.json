@@ -6,6 +6,7 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "ios-device": "npx expo run:ios --device",
     "web": "expo start --web",
     "dev": "expo start",
     "typecheck": "tsc --noEmit"
@@ -57,4 +58,3 @@
   },
   "private": true
 }
-

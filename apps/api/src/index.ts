@@ -1,28 +1,20 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import type { Env } from './types/env';
 import transcribe from './routes/transcribe';
 import pull from './routes/sync/pull';
 import push from './routes/sync/push';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Env }>();
 
-// Simple CORS middleware
-app.use('/*', async (c, next) => {
-  c.header('Access-Control-Allow-Origin', '*');
-  c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  if (c.req.method === 'OPTIONS') {
-    return c.text('', 204);
-  }
-  
-  await next();
-});
+// CORS middleware
+app.use('/*', cors());
 
 // API routes
 app.route('/api/transcribe', transcribe);
 
 // Sync routes
-const sync = new Hono();
+const sync = new Hono<{ Bindings: Env }>();
 sync.route('/pull', pull);
 sync.route('/push', push);
 app.route('/sync', sync);
@@ -33,4 +25,3 @@ app.get('/health', (c) => {
 });
 
 export default app;
-

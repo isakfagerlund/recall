@@ -9,6 +9,9 @@ expo-env.d.ts
 .env
 .env.local
 
+# Wrangler local dev vars
+.dev.vars
+
 # Turborepo
 .turbo
 
