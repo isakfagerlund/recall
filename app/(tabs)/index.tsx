@@ -11,7 +11,7 @@ import {
 
 import { format } from 'date-fns';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
 import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
@@ -26,6 +26,7 @@ import {
   ScrollView,
   Text,
 } from 'react-native';
+import { useVoiceToText } from '@/components/useVoiceToText';
 import { KeyboardToolbar } from 'react-native-keyboard-controller';
 import Animated, {
   useSharedValue,
@@ -43,6 +44,13 @@ export default function TabOneScreen() {
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const {
+    isRecording,
+    isTranscribing,
+    error: voiceError,
+    startRecording,
+    stopRecording,
+  } = useVoiceToText();
 
   // Use Live Query to reactively fetch people from database
   // Drizzle's mode: 'timestamp' automatically converts timestamps to Date objects
@@ -128,6 +136,40 @@ export default function TabOneScreen() {
     }
   };
 
+  const handleVoiceRecording = async (): Promise<void> => {
+    try {
+      setError(''); // Clear any previous errors
+      if (isRecording) {
+        // Stop recording and transcribe
+        const transcribedText = await stopRecording();
+        if (transcribedText) {
+          setValue(transcribedText);
+          fieldRef.current?.setText(transcribedText);
+        } else {
+          // If transcription failed, error is already set by the hook
+          if (!voiceError) {
+            setError('Failed to transcribe audio. Please try again.');
+          }
+        }
+      } else {
+        // Start recording
+        await startRecording();
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to record audio';
+      setError(message);
+      console.error('Error with voice recording:', err);
+    }
+  };
+
+  // Sync voice errors to main error state
+  useEffect(() => {
+    if (voiceError) {
+      setError(voiceError);
+    }
+  }, [voiceError]);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -150,6 +192,18 @@ export default function TabOneScreen() {
           <ScrollView keyboardShouldPersistTaps="handled">
             {people.length > 0 && <RecentPeople people={people} />}
           </ScrollView>
+          {error ? (
+            <View
+              style={{
+                padding: 12,
+                backgroundColor: '#FF3B30',
+                borderRadius: 8,
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 14 }}>{error}</Text>
+            </View>
+          ) : null}
           <Host matchContents style={{ width: '100%', height: 300 }}>
             <HStack spacing={12}>
               <VStack
@@ -171,6 +225,18 @@ export default function TabOneScreen() {
                 />
               </VStack>
               <Button
+                systemImage={
+                  isRecording || isTranscribing ? undefined : 'mic.fill'
+                }
+                variant={isRecording ? 'glassProminent' : 'glass'}
+                onPress={handleVoiceRecording}
+                disabled={isTranscribing || isLoading}
+              >
+                {(isRecording || isTranscribing) && (
+                  <CircularProgress color="#fff" />
+                )}
+              </Button>
+              <Button
                 systemImage={isLoading ? undefined : 'checkmark'}
                 variant="glassProminent"
                 onPress={async () => {
@@ -178,6 +244,7 @@ export default function TabOneScreen() {
                   setValue('');
                   fieldRef.current?.setText('');
                 }}
+                disabled={isRecording || isTranscribing}
               >
                 <CircularProgress color="#fff" />
               </Button>
