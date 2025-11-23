@@ -26,6 +26,7 @@ import {
   ScrollView,
   Text,
 } from 'react-native';
+import { KeyboardToolbar } from 'react-native-keyboard-controller';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -128,61 +129,66 @@ export default function TabOneScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#D9D9D9' }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#D9D9D9',
-          paddingTop: 72,
-          paddingBottom: 124,
-          paddingHorizontal: 18,
-        gap: 18,
-        }}
+    <>
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: '#D9D9D9' }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={0}
       >
-        <ScrollView keyboardShouldPersistTaps="handled">
-          {people.length > 0 && <RecentPeople people={people} />}
-        </ScrollView>
-        <Host matchContents style={{ width: '100%', height: 300 }}>
-          <HStack spacing={12}>
-            <VStack
-              modifiers={[
-                glassEffect({
-                  shape: 'capsule',
-                  glass: {
-                    interactive: true,
-                    variant: 'clear',
-                  },
-                }),
-              ]}
-            >
-              <TextField
-                ref={fieldRef}
-                modifiers={[padding({ horizontal: 12, vertical: 6 })]}
-                autocorrection={false}
-                onChangeText={setValue}
-              />
-            </VStack>
-            <Button
-              systemImage={isLoading ? undefined : 'checkmark'}
-              variant="glassProminent"
-              onPress={async () => {
-                await handlePersonSubmit();
-                setValue('');
-                fieldRef.current?.setText('');
-              }}
-            >
-              <CircularProgress color="#fff" />
-            </Button>
-          </HStack>
-        </Host>
-      </View>
-    </KeyboardAvoidingView>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: '#D9D9D9',
+            paddingTop: 72,
+            paddingBottom: 124,
+            paddingHorizontal: 18,
+            gap: 18,
+          }}
+        >
+          <ScrollView keyboardShouldPersistTaps="handled">
+            {people.length > 0 && <RecentPeople people={people} />}
+          </ScrollView>
+          <Host matchContents style={{ width: '100%', height: 300 }}>
+            <HStack spacing={12}>
+              <VStack
+                modifiers={[
+                  glassEffect({
+                    shape: 'capsule',
+                    glass: {
+                      interactive: true,
+                      variant: 'clear',
+                    },
+                  }),
+                ]}
+              >
+                <TextField
+                  ref={fieldRef}
+                  modifiers={[padding({ horizontal: 12, vertical: 6 })]}
+                  autocorrection={false}
+                  onChangeText={setValue}
+                />
+              </VStack>
+              <Button
+                systemImage={isLoading ? undefined : 'checkmark'}
+                variant="glassProminent"
+                onPress={async () => {
+                  await handlePersonSubmit();
+                  setValue('');
+                  fieldRef.current?.setText('');
+                }}
+              >
+                <CircularProgress color="#fff" />
+              </Button>
+            </HStack>
+          </Host>
+        </View>
+      </KeyboardAvoidingView>
+      <KeyboardToolbar enabled={Platform.OS === 'ios'}>
+        <KeyboardToolbar.Done onPress={() => Keyboard.dismiss()} />
+      </KeyboardToolbar>
+    </>
   );
 }
 
