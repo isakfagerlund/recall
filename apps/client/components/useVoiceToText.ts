@@ -23,6 +23,17 @@ function getTranscribeApiUrl(): string {
   return `${apiUrl}/api/transcribe`;
 }
 
+/**
+ * Get the API key from environment
+ */
+function getApiKey(): string {
+  const apiKey = process.env.EXPO_PUBLIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('EXPO_PUBLIC_API_KEY environment variable is required');
+  }
+  return apiKey;
+}
+
 interface UseVoiceToTextReturn {
   isRecording: boolean;
   isTranscribing: boolean;
@@ -147,10 +158,12 @@ export function useVoiceToText(): UseVoiceToTextReturn {
 
       // Send base64 data directly to the server
       const apiUrl = getTranscribeApiUrl();
+      const apiKey = getApiKey();
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           audio: base64,

@@ -1,5 +1,9 @@
 import * as Crypto from 'expo-crypto';
-import { getAllPeopleForSync, upsertPeopleFromSync, markAsSynced } from '@/db/sync';
+import {
+  getAllPeopleForSync,
+  upsertPeopleFromSync,
+  markAsSynced,
+} from '@/db/sync';
 import { Person } from '@/types/person';
 
 /**
@@ -14,13 +18,21 @@ function getApiUrl(): string {
 }
 
 /**
+ * Get the API key from environment
+ */
+function getApiKey(): string {
+  const apiKey = process.env.EXPO_PUBLIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('EXPO_PUBLIC_API_KEY environment variable is required');
+  }
+  return apiKey;
+}
+
+/**
  * Create HMAC signature for authentication
  * Note: This uses a simple hash approach. For production, consider using proper HMAC.
  */
-async function createHmacSignature(
-  data: string,
-  key: string
-): Promise<string> {
+async function createHmacSignature(data: string, key: string): Promise<string> {
   // Create a simple HMAC-like signature by hashing data + key
   // In production, use proper HMAC (expo-crypto doesn't support HMAC directly)
   const combined = `${data}:${key}`;
@@ -54,7 +66,7 @@ export async function importData(people: Person[]): Promise<void> {
 
   const normalized = people.map((person) => ({
     ...person,
-    createdAt: normalizeDate(person.createdAt),
+    createdAt: normalizeDate(person.createdAt) ?? new Date(),
     updatedAt: normalizeDate(person.updatedAt),
     deletedAt: normalizeDate(person.deletedAt),
   }));
@@ -66,22 +78,22 @@ export async function importData(people: Person[]): Promise<void> {
 /**
  * Sync data to server
  */
-export async function syncToServer(
-  syncKey: string
-): Promise<void> {
+export async function syncToServer(syncKey: string): Promise<void> {
   const apiUrl = getApiUrl();
   const data = await exportData();
   const dataString = JSON.stringify(data);
-  
+
   // Create HMAC signature
   const signature = await createHmacSignature(dataString, syncKey);
-  
+
   // For now, we'll send the data as-is (not encrypted)
   // Encryption can be added later if needed
+  const apiKey = getApiKey();
   const response = await fetch(`${apiUrl}/push`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       syncKey,
@@ -89,41 +101,46 @@ export async function syncToServer(
       signature,
     }),
   });
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Sync failed: ${errorText}`);
   }
-  
+
   await markAsSynced(new Date());
 }
 
 /**
  * Sync data from server
  */
-export async function syncFromServer(
-  syncKey: string
-): Promise<void> {
+export async function syncFromServer(syncKey: string): Promise<void> {
   const apiUrl = getApiUrl();
-  
+
   // Create HMAC signature for the request
   const timestamp = Date.now().toString();
   const signature = await createHmacSignature(timestamp, syncKey);
-  
-  const response = await fetch(`${apiUrl}/pull?syncKey=${encodeURIComponent(syncKey)}&timestamp=${timestamp}&signature=${encodeURIComponent(signature)}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  
+  const apiKey = getApiKey();
+
+  const response = await fetch(
+    `${apiUrl}/pull?syncKey=${encodeURIComponent(
+      syncKey
+    )}&timestamp=${timestamp}&signature=${encodeURIComponent(signature)}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+    }
+  );
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Sync failed: ${errorText}`);
   }
-  
+
   const result = await response.json();
-  
+
   if (result.data) {
     const people: Person[] = JSON.parse(result.data);
     await importData(people);
