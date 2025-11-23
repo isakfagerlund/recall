@@ -9,6 +9,8 @@ import {
 import { File } from 'expo-file-system';
 import Constants from 'expo-constants';
 import { Alert } from 'react-native';
+import { experimental_transcribe } from 'ai';
+import { apple } from '@react-native-ai/apple';
 
 /**
  * Get the API URL for transcription endpoint
@@ -125,6 +127,31 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       const file = new File(audioUri);
       const base64 = await file.base64();
 
+      // Try to use Apple's local transcription model first
+      // If it fails, we'll fall back to OpenAI
+      let localTranscription: string | null = null;
+      try {
+        const model = apple.transcriptionModel();
+        const local_response = await model.doGenerate({
+          audio: base64,
+          mediaType: 'audio',
+          providerOptions: {
+            apple: {
+              language: 'en_US',
+            },
+          },
+        });
+        localTranscription = local_response.text;
+        console.log('Local transcription successful:', localTranscription);
+      } catch (localError) {
+        // Apple transcription failed (likely assets not available)
+        // This is expected on some devices/locales, so we'll fall back to OpenAI
+        console.warn(
+          'Apple local transcription failed, falling back to OpenAI:',
+          localError
+        );
+      }
+
       // Send base64 data directly to the server
       const apiUrl = getTranscribeApiUrl();
       const response = await fetch(apiUrl, {
@@ -146,7 +173,10 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       }
 
       const result = await response.json();
-      return result.text ?? null;
+      const openAITranscription = result.text ?? null;
+
+      // Return local transcription if available, otherwise use OpenAI
+      return localTranscription ?? openAITranscription;
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to transcribe audio';
