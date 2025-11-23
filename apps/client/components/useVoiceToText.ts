@@ -16,18 +16,11 @@ import { apple } from '@react-native-ai/apple';
  * Get the API URL for transcription endpoint
  */
 function getTranscribeApiUrl(): string {
-  // Check for production API URL from environment
-  const productionUrl = process.env.EXPO_PUBLIC_TRANSCRIBE_API_URL;
-  if (productionUrl) {
-    return productionUrl;
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error('EXPO_PUBLIC_API_URL environment variable is required');
   }
-
-  // Development: use relative URL
-  if (Constants.expoConfig?.hostUri) {
-    return `http://${Constants.expoConfig.hostUri}/api/transcribe`;
-  }
-
-  return '/api/transcribe';
+  return `${apiUrl}/api/transcribe`;
 }
 
 interface UseVoiceToTextReturn {

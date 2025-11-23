@@ -1,0 +1,11 @@
+name = "recall-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[env.production]
+name = "recall-api"
+
+[env.production.vars]
+# Environment variables can be set here, but secrets should be set via:
+# wrangler secret put SECRET_NAME
+

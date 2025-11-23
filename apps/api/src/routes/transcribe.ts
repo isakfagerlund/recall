@@ -1,25 +1,36 @@
-import { StatusError } from 'expo-server';
+import { Hono } from 'hono';
 
-export async function POST(request: Request) {
+const transcribe = new Hono();
+
+transcribe.post('/', async (c) => {
   try {
-    const body = await request.json();
+    const body = await c.req.json();
     const { audio: base64Audio, format } = body;
 
     if (!base64Audio || typeof base64Audio !== 'string') {
-      throw new StatusError(400, 'Missing or invalid audio data');
+      return c.json({ error: 'Missing or invalid audio data' }, 400);
     }
 
     const apiKey = process.env.OPEN_AI_KEY;
     if (!apiKey) {
-      throw new StatusError(500, 'OpenAI API key not configured');
+      return c.json({ error: 'OpenAI API key not configured' }, 500);
     }
 
-    // Convert base64 string to Buffer
-    const buffer = Buffer.from(base64Audio, 'base64');
+    // Convert base64 string to ArrayBuffer/Uint8Array
+    // Handle base64 string (remove data URL prefix if present)
+    const base64Data = base64Audio.includes(',') 
+      ? base64Audio.split(',')[1] 
+      : base64Audio;
+    
+    const binaryString = atob(base64Data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
 
     // Validate buffer is not empty
-    if (buffer.length === 0) {
-      throw new StatusError(400, 'Audio file is empty');
+    if (bytes.length === 0) {
+      return c.json({ error: 'Audio file is empty' }, 400);
     }
 
     // Determine the audio format (default to m4a if not specified)
@@ -28,12 +39,11 @@ export async function POST(request: Request) {
 
     // Create FormData for OpenAI API with the correct file format
     const formData = new FormData();
-    const blob = new Blob([buffer], { type: `audio/${audioFormat}` });
+    const blob = new Blob([bytes], { type: `audio/${audioFormat}` });
     formData.append('file', blob, fileName);
     formData.append('model', 'whisper-1');
 
     // Call OpenAI's transcription API directly
-    // This gives us full control over the file format
     const response = await fetch(
       'https://api.openai.com/v1/audio/transcriptions',
       {
@@ -53,21 +63,21 @@ export async function POST(request: Request) {
       } catch {
         errorMessage = await response.text();
       }
-      throw new StatusError(
-        response.status,
-        `OpenAI API error: ${errorMessage}`
+      return c.json(
+        { error: `OpenAI API error: ${errorMessage}` },
+        response.status
       );
     }
 
     const result = await response.json();
-    return Response.json({ text: result.text });
+    return c.json({ text: result.text });
   } catch (error) {
-    if (error instanceof StatusError) {
-      throw error;
-    }
     console.error('Error transcribing audio:', error);
     const message =
       error instanceof Error ? error.message : 'Failed to transcribe audio';
-    throw new StatusError(500, message);
+    return c.json({ error: message }, 500);
   }
-}
+});
+
+export default transcribe;
+

@@ -1,5 +1,4 @@
 import * as Crypto from 'expo-crypto';
-import Constants from 'expo-constants';
 import { getAllPeopleForSync, upsertPeopleFromSync, markAsSynced } from '@/db/sync';
 import { Person } from '@/types/person';
 
@@ -7,18 +6,11 @@ import { Person } from '@/types/person';
  * Get the API URL based on environment
  */
 function getApiUrl(): string {
-  // Check for production API URL from environment
-  const productionUrl = process.env.EXPO_PUBLIC_SYNC_API_URL;
-  if (productionUrl) {
-    return productionUrl;
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error('EXPO_PUBLIC_API_URL environment variable is required');
   }
-  
-  // Development: use relative URL
-  if (Constants.expoConfig?.hostUri) {
-    return `http://${Constants.expoConfig.hostUri}/sync`;
-  }
-  
-  return '/sync';
+  return `${apiUrl}/sync`;
 }
 
 /**
