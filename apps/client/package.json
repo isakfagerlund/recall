@@ -10,7 +10,9 @@
     "ios-device-release": "npx expo run:ios --device --configuration Release",
     "web": "expo start --web",
     "dev": "expo start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.71",
