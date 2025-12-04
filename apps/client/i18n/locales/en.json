@@ -1,0 +1,70 @@
+{
+  "home": {
+    "title": "People",
+    "placeholder": "Enter person details...",
+    "submit": "Submit",
+    "recording": "Recording...",
+    "transcribing": "Transcribing...",
+    "errors": {
+      "empty": "Please enter a person description",
+      "generate": "Failed to generate person data",
+      "record": "Failed to record audio",
+      "transcribe": "Failed to transcribe audio. Please try again.",
+      "delete": "Failed to delete person"
+    },
+    "delete": {
+      "title": "Delete Person",
+      "message": "Are you sure you want to delete {{name}}?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "saved": "Person saved successfully"
+  },
+  "settings": {
+    "title": "Settings",
+    "syncKey": {
+      "title": "Sync Key",
+      "description": "Copy, paste, or regenerate your sync key.",
+      "notAvailable": "Not available",
+      "copy": "Copy",
+      "regenerate": "Regenerate",
+      "regenerateTitle": "Regenerate key",
+      "regenerateMessage": "This will replace your current key. The old key will no longer sync. Continue?",
+      "regenerateSuccess": "Key regenerated",
+      "regenerateSuccessMessage": "New key created. Please sync.",
+      "copied": "Copied",
+      "copiedMessage": "Sync key copied to clipboard"
+    },
+    "applyKey": {
+      "title": "Paste / Apply Key",
+      "placeholder": "Paste a sync key",
+      "pasteFromClipboard": "Paste from clipboard",
+      "apply": "Apply key",
+      "description": "Applying a key replaces the current one. Old keys will no longer sync.",
+      "success": "Sync key updated",
+      "successMessage": "New key applied. Please sync now.",
+      "empty": "Please enter a sync key to apply"
+    },
+    "sync": {
+      "now": "Sync Now",
+      "lastSync": "Last synced: {{date}}",
+      "success": "Success",
+      "successMessage": "Sync completed successfully",
+      "failed": "Sync Failed",
+      "noKey": "No sync key available"
+    },
+    "errors": {
+      "loadKey": "Failed to load sync key",
+      "applyKey": "Failed to apply key",
+      "regenerateKey": "Failed to regenerate key"
+    }
+  },
+  "common": {
+    "error": "Error",
+    "loading": "Loading...",
+    "name": "Name",
+    "description": "Description",
+    "interests": "Interests",
+    "extras": "Extras"
+  }
+}

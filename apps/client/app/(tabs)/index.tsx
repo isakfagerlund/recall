@@ -10,6 +10,7 @@ import {
 } from '@expo/ui/swift-ui';
 
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
@@ -40,6 +41,7 @@ import { people as peopleTable, PersonRow } from '@/db/schema';
 import { desc, eq, isNull } from 'drizzle-orm';
 
 export default function TabOneScreen() {
+  const { t } = useTranslation();
   const fieldRef = useRef<TextFieldRef>(null);
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +90,7 @@ export default function TabOneScreen() {
 
   const handlePersonSubmit = async (): Promise<void> => {
     if (!value.trim()) {
-      setError('Please enter a person description');
+      setError(t('home.errors.empty'));
       return;
     }
 
@@ -128,7 +130,7 @@ export default function TabOneScreen() {
       console.log('Saved person to database:', personId);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to generate person data';
+        err instanceof Error ? err.message : t('home.errors.generate');
       setError(message);
       console.error('Error generating person:', err);
     } finally {
@@ -148,7 +150,7 @@ export default function TabOneScreen() {
         } else {
           // If transcription failed, error is already set by the hook
           if (!voiceError) {
-            setError('Failed to transcribe audio. Please try again.');
+            setError(t('home.errors.transcribe'));
           }
         }
       } else {
@@ -157,7 +159,7 @@ export default function TabOneScreen() {
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to record audio';
+        err instanceof Error ? err.message : t('home.errors.record');
       setError(message);
       console.error('Error with voice recording:', err);
     }
@@ -270,6 +272,7 @@ const RecentPeople = ({ people }: { people: Person[] }) => {
 };
 
 const PersonCard = ({ person }: { person: Person }) => {
+  const { t } = useTranslation();
   const scale = useSharedValue(1);
   const backgroundColor = useThemeColor({}, 'background');
 
@@ -283,7 +286,7 @@ const PersonCard = ({ person }: { person: Person }) => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['Cancel', 'Delete'],
+          options: [t('home.delete.cancel'), t('home.delete.confirm')],
           destructiveButtonIndex: 1,
           cancelButtonIndex: 0,
         },
@@ -295,15 +298,15 @@ const PersonCard = ({ person }: { person: Person }) => {
       );
     } else {
       Alert.alert(
-        'Delete Person',
-        `Are you sure you want to delete ${person.name}?`,
+        t('home.delete.title'),
+        t('home.delete.message', { name: person.name }),
         [
           {
-            text: 'Cancel',
+            text: t('home.delete.cancel'),
             style: 'cancel',
           },
           {
-            text: 'Delete',
+            text: t('home.delete.confirm'),
             style: 'destructive',
             onPress: () => handleDeletePerson(person.id),
           },
@@ -361,6 +364,6 @@ const handleDeletePerson = async (personId: string): Promise<void> => {
     const message =
       err instanceof Error ? err.message : 'Failed to delete person';
     console.error('Error deleting person:', err);
-    Alert.alert('Error', message);
+    Alert.alert('common.error', message);
   }
 };

@@ -109,8 +109,7 @@ export default function PersonForm() {
       {generatedPerson && (
         <View style={{ marginTop: 20 }}>
           <Text>Name: {generatedPerson.name}</Text>
-          <Text>Interests: {generatedPerson.interests.join(', ')}</Text>
-          <Text>Extras: {generatedPerson.extras}</Text>
+          <Text>Description: {generatedPerson.description}</Text>
         </View>
       )}
     </View>
