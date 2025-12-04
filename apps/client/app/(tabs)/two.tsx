@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { useTranslation } from 'react-i18next';
 
 import { db } from '@/db';
 import { people as peopleTable } from '@/db/schema';
@@ -23,6 +24,7 @@ import { performSync } from '@/lib/sync/sync';
 import { markAllAsUnsynced } from '@/db/sync';
 
 export default function SettingsScreen() {
+  const { t } = useTranslation();
   const [syncKey, setSyncKeyState] = useState<string | null>(null);
   const [pastedKey, setPastedKey] = useState('');
   const [lastSync, setLastSync] = useState<Date | null>(null);
@@ -43,7 +45,7 @@ export default function SettingsScreen() {
       setSyncKeyState(key);
     } catch (err) {
       console.error('Error loading sync key', err);
-      setError('Failed to load sync key');
+      setError(t('settings.errors.loadKey'));
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +75,7 @@ export default function SettingsScreen() {
   const handleCopyKey = async () => {
     if (!syncKey) return;
     await Clipboard.setStringAsync(syncKey);
-    Alert.alert('Copied', 'Sync key copied to clipboard');
+    Alert.alert(t('settings.syncKey.copied'), t('settings.syncKey.copiedMessage'));
   };
 
   const handlePasteFromClipboard = async () => {
@@ -83,7 +85,7 @@ export default function SettingsScreen() {
 
   const applyPastedKey = async () => {
     if (!pastedKey.trim()) {
-      setError('Please enter a sync key to apply');
+      setError(t('settings.applyKey.empty'));
       return;
     }
     try {
@@ -92,24 +94,24 @@ export default function SettingsScreen() {
       await markAllAsUnsynced();
       setLastSync(null);
       setError(null);
-      Alert.alert('Sync key updated', 'New key applied. Please sync now.');
+      Alert.alert(t('settings.applyKey.success'), t('settings.applyKey.successMessage'));
     } catch (err) {
       console.error('Error applying key', err);
       const message =
-        err instanceof Error ? err.message : 'Failed to apply key';
+        err instanceof Error ? err.message : t('settings.errors.applyKey');
       setError(message);
-      Alert.alert('Error', message);
+      Alert.alert(t('common.error'), message);
     }
   };
 
   const regenerateKey = () => {
     Alert.alert(
-      'Regenerate key',
-      'This will replace your current key. The old key will no longer sync. Continue?',
+      t('settings.syncKey.regenerateTitle'),
+      t('settings.syncKey.regenerateMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('home.delete.cancel'), style: 'cancel' },
         {
-          text: 'Regenerate',
+          text: t('settings.syncKey.regenerate'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -120,13 +122,13 @@ export default function SettingsScreen() {
               await markAllAsUnsynced();
               setLastSync(null);
               setError(null);
-              Alert.alert('Key regenerated', 'New key created. Please sync.');
+              Alert.alert(t('settings.syncKey.regenerateSuccess'), t('settings.syncKey.regenerateSuccessMessage'));
             } catch (err) {
               console.error('Error regenerating key', err);
               const message =
-                err instanceof Error ? err.message : 'Failed to regenerate key';
+                err instanceof Error ? err.message : t('settings.errors.regenerateKey');
               setError(message);
-              Alert.alert('Error', message);
+              Alert.alert(t('common.error'), message);
             }
           },
         },
@@ -136,7 +138,7 @@ export default function SettingsScreen() {
 
   const handleSync = async () => {
     if (!syncKey) {
-      setError('No sync key available');
+      setError(t('settings.sync.noKey'));
       return;
     }
     setIsSyncing(true);
@@ -144,12 +146,12 @@ export default function SettingsScreen() {
     try {
       await performSync(syncKey);
       await loadLastSync();
-      Alert.alert('Success', 'Sync completed successfully');
+      Alert.alert(t('settings.sync.success'), t('settings.sync.successMessage'));
     } catch (err) {
       console.error('Sync failed', err);
-      const message = err instanceof Error ? err.message : 'Sync failed';
+      const message = err instanceof Error ? err.message : t('settings.sync.failed');
       setError(message);
-      Alert.alert('Sync Failed', message);
+      Alert.alert(t('settings.sync.failed'), message);
     } finally {
       setIsSyncing(false);
     }
@@ -160,10 +162,10 @@ export default function SettingsScreen() {
       style={{ flex: 1, backgroundColor: '#D9D9D9' }}
       contentContainerStyle={{ padding: 20, gap: 16 }}
     >
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Settings</Text>
+      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{t('settings.title')}</Text>
 
       <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 16, fontWeight: '600' }}>Sync Key</Text>
+        <Text style={{ fontSize: 16, fontWeight: '600' }}>{t('settings.syncKey.title')}</Text>
         <View
           style={{
             backgroundColor: '#f0f0f0',
@@ -183,12 +185,12 @@ export default function SettingsScreen() {
               selectable
               numberOfLines={2}
             >
-              {syncKey ?? 'Not available'}
+              {syncKey ?? t('settings.syncKey.notAvailable')}
             </Text>
           )}
         </View>
         <Text style={{ fontSize: 12, color: '#666' }}>
-          Copy, paste, or regenerate your sync key.
+          {t('settings.syncKey.description')}
         </Text>
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <Pressable
@@ -201,7 +203,7 @@ export default function SettingsScreen() {
             }}
             disabled={!syncKey}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Copy</Text>
+            <Text style={{ color: '#fff', fontWeight: '600' }}>{t('settings.syncKey.copy')}</Text>
           </Pressable>
           <Pressable
             onPress={regenerateKey}
@@ -212,17 +214,17 @@ export default function SettingsScreen() {
               borderRadius: 8,
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Regenerate</Text>
+            <Text style={{ color: '#fff', fontWeight: '600' }}>{t('settings.syncKey.regenerate')}</Text>
           </Pressable>
         </View>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 16, fontWeight: '600' }}>Paste / Apply Key</Text>
+        <Text style={{ fontSize: 16, fontWeight: '600' }}>{t('settings.applyKey.title')}</Text>
         <TextInput
           value={pastedKey}
           onChangeText={setPastedKey}
-          placeholder="Paste a sync key"
+          placeholder={t('settings.applyKey.placeholder')}
           style={{
             backgroundColor: '#fff',
             borderRadius: 8,
@@ -243,7 +245,7 @@ export default function SettingsScreen() {
               borderRadius: 8,
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Paste from clipboard</Text>
+            <Text style={{ color: '#fff', fontWeight: '600' }}>{t('settings.applyKey.pasteFromClipboard')}</Text>
           </Pressable>
           <Pressable
             onPress={applyPastedKey}
@@ -254,17 +256,17 @@ export default function SettingsScreen() {
               borderRadius: 8,
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Apply key</Text>
+            <Text style={{ color: '#fff', fontWeight: '600' }}>{t('settings.applyKey.apply')}</Text>
           </Pressable>
         </View>
         <Text style={{ fontSize: 12, color: '#666' }}>
-          Applying a key replaces the current one. Old keys will no longer sync.
+          {t('settings.applyKey.description')}
         </Text>
       </View>
 
       {lastSync && (
         <Text style={{ fontSize: 12, color: '#666' }}>
-          Last synced: {lastSync.toLocaleString()}
+          {t('settings.sync.lastSync', { date: lastSync.toLocaleString() })}
         </Text>
       )}
 
@@ -295,7 +297,7 @@ export default function SettingsScreen() {
         {isSyncing ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={{ color: '#fff', fontWeight: '700' }}>Sync Now</Text>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>{t('settings.sync.now')}</Text>
         )}
       </Pressable>
     </ScrollView>

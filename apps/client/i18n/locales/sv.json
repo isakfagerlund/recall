@@ -1,0 +1,70 @@
+{
+  "home": {
+    "title": "Personer",
+    "placeholder": "Ange personuppgifter...",
+    "submit": "Skicka",
+    "recording": "Spelar in...",
+    "transcribing": "Transkriberar...",
+    "errors": {
+      "empty": "Vänligen ange en personbeskrivning",
+      "generate": "Misslyckades med att generera persondata",
+      "record": "Misslyckades med att spela in ljud",
+      "transcribe": "Misslyckades med att transkribera ljud. Försök igen.",
+      "delete": "Misslyckades med att ta bort person"
+    },
+    "delete": {
+      "title": "Ta bort person",
+      "message": "Är du säker på att du vill ta bort {{name}}?",
+      "confirm": "Ta bort",
+      "cancel": "Avbryt"
+    },
+    "saved": "Person sparad"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "syncKey": {
+      "title": "Synkroniseringsnyckel",
+      "description": "Kopiera, klistra in eller återskapa din synkroniseringsnyckel.",
+      "notAvailable": "Inte tillgänglig",
+      "copy": "Kopiera",
+      "regenerate": "Återskapa",
+      "regenerateTitle": "Återskapa nyckel",
+      "regenerateMessage": "Detta kommer att ersätta din nuvarande nyckel. Den gamla nyckeln kommer inte längre att synkronisera. Fortsätta?",
+      "regenerateSuccess": "Nyckel återskapad",
+      "regenerateSuccessMessage": "Ny nyckel skapad. Vänligen synkronisera.",
+      "copied": "Kopierad",
+      "copiedMessage": "Synkroniseringsnyckel kopierad till urklipp"
+    },
+    "applyKey": {
+      "title": "Klistra in / Tillämpa nyckel",
+      "placeholder": "Klistra in en synkroniseringsnyckel",
+      "pasteFromClipboard": "Klistra in från urklipp",
+      "apply": "Tillämpa nyckel",
+      "description": "Att tillämpa en nyckel ersätter den nuvarande. Gamla nycklar kommer inte längre att synkronisera.",
+      "success": "Synkroniseringsnyckel uppdaterad",
+      "successMessage": "Ny nyckel tillämpad. Vänligen synkronisera nu.",
+      "empty": "Vänligen ange en synkroniseringsnyckel att tillämpa"
+    },
+    "sync": {
+      "now": "Synkronisera nu",
+      "lastSync": "Senast synkroniserad: {{date}}",
+      "success": "Lyckades",
+      "successMessage": "Synkronisering slutförd",
+      "failed": "Synkronisering misslyckades",
+      "noKey": "Ingen synkroniseringsnyckel tillgänglig"
+    },
+    "errors": {
+      "loadKey": "Misslyckades med att ladda synkroniseringsnyckel",
+      "applyKey": "Misslyckades med att tillämpa nyckel",
+      "regenerateKey": "Misslyckades med att återskapa nyckel"
+    }
+  },
+  "common": {
+    "error": "Fel",
+    "loading": "Laddar...",
+    "name": "Namn",
+    "description": "Beskrivning",
+    "interests": "Intressen",
+    "extras": "Extra"
+  }
+}

@@ -12,6 +12,7 @@ import 'react-native-reanimated';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useColorScheme } from '@/components/useColorScheme';
 import { initializeDatabase } from '@/db';
+import '@/i18n';
 
 export { ErrorBoundary } from 'expo-router';
 

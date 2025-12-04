@@ -1,0 +1,70 @@
+{
+  "home": {
+    "title": "Personen",
+    "placeholder": "Personendetails eingeben...",
+    "submit": "Absenden",
+    "recording": "Aufnahme läuft...",
+    "transcribing": "Transkribieren...",
+    "errors": {
+      "empty": "Bitte geben Sie eine Personenbeschreibung ein",
+      "generate": "Fehler beim Generieren von Personendaten",
+      "record": "Fehler beim Aufnehmen von Audio",
+      "transcribe": "Fehler beim Transkribieren von Audio. Bitte versuchen Sie es erneut.",
+      "delete": "Fehler beim Löschen der Person"
+    },
+    "delete": {
+      "title": "Person löschen",
+      "message": "Möchten Sie {{name}} wirklich löschen?",
+      "confirm": "Löschen",
+      "cancel": "Abbrechen"
+    },
+    "saved": "Person erfolgreich gespeichert"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "syncKey": {
+      "title": "Synchronisierungsschlüssel",
+      "description": "Kopieren, einfügen oder regenerieren Sie Ihren Synchronisierungsschlüssel.",
+      "notAvailable": "Nicht verfügbar",
+      "copy": "Kopieren",
+      "regenerate": "Regenerieren",
+      "regenerateTitle": "Schlüssel regenerieren",
+      "regenerateMessage": "Dies ersetzt Ihren aktuellen Schlüssel. Der alte Schlüssel wird nicht mehr synchronisiert. Fortfahren?",
+      "regenerateSuccess": "Schlüssel regeneriert",
+      "regenerateSuccessMessage": "Neuer Schlüssel erstellt. Bitte synchronisieren.",
+      "copied": "Kopiert",
+      "copiedMessage": "Synchronisierungsschlüssel in Zwischenablage kopiert"
+    },
+    "applyKey": {
+      "title": "Schlüssel einfügen / anwenden",
+      "placeholder": "Synchronisierungsschlüssel einfügen",
+      "pasteFromClipboard": "Aus Zwischenablage einfügen",
+      "apply": "Schlüssel anwenden",
+      "description": "Das Anwenden eines Schlüssels ersetzt den aktuellen. Alte Schlüssel werden nicht mehr synchronisiert.",
+      "success": "Synchronisierungsschlüssel aktualisiert",
+      "successMessage": "Neuer Schlüssel angewendet. Bitte jetzt synchronisieren.",
+      "empty": "Bitte geben Sie einen Synchronisierungsschlüssel zum Anwenden ein"
+    },
+    "sync": {
+      "now": "Jetzt synchronisieren",
+      "lastSync": "Zuletzt synchronisiert: {{date}}",
+      "success": "Erfolg",
+      "successMessage": "Synchronisierung erfolgreich abgeschlossen",
+      "failed": "Synchronisierung fehlgeschlagen",
+      "noKey": "Kein Synchronisierungsschlüssel verfügbar"
+    },
+    "errors": {
+      "loadKey": "Fehler beim Laden des Synchronisierungsschlüssels",
+      "applyKey": "Fehler beim Anwenden des Schlüssels",
+      "regenerateKey": "Fehler beim Regenerieren des Schlüssels"
+    }
+  },
+  "common": {
+    "error": "Fehler",
+    "loading": "Lädt...",
+    "name": "Name",
+    "description": "Beschreibung",
+    "interests": "Interessen",
+    "extras": "Extras"
+  }
+}
