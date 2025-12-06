@@ -1,48 +1,26 @@
-import { View, useThemeColor } from '@/components/Themed';
-import {
-  Button,
-  CircularProgress,
-  Host,
-  HStack,
-  TextField,
-  TextFieldRef,
-  VStack,
-} from '@expo/ui/swift-ui';
-
-import { format } from 'date-fns';
-
-import React, { useEffect, useRef, useState } from 'react';
-import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
+import { View } from '@/components/Themed';
+import React, { useEffect, useState } from 'react';
 import { apple } from '@react-native-ai/apple';
 import { generateObject } from 'ai';
 import { generatePersonSchema, Person } from '@/types/person';
 import {
-  ActionSheetIOS,
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   Text,
 } from 'react-native';
 import { useVoiceToText } from '@/components/useVoiceToText';
-import { useCalendarEvents } from '@/components/useCalendarEvents';
 import { KeyboardToolbar } from 'react-native-keyboard-controller';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
 import * as Crypto from 'expo-crypto';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '@/db';
 import { people as peopleTable, PersonRow } from '@/db/schema';
-import { desc, eq, isNull } from 'drizzle-orm';
-import { getCalendarContext } from '@/utils/calendarMatch';
+import { desc, isNull } from 'drizzle-orm';
+import { RecentPeople } from '@/components/RecentPeople';
+import { PeopleInput } from '@/components/PeopleInput';
 
 export default function TabOneScreen() {
-  const fieldRef = useRef<TextFieldRef>(null);
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -146,7 +124,6 @@ export default function TabOneScreen() {
         const transcribedText = await stopRecording();
         if (transcribedText) {
           setValue(transcribedText);
-          fieldRef.current?.setText(transcribedText);
         } else {
           // If transcription failed, error is already set by the hook
           if (!voiceError) {
@@ -197,6 +174,8 @@ export default function TabOneScreen() {
           {error ? (
             <View
               style={{
+                flex: 1,
+                width: '100%',
                 padding: 12,
                 backgroundColor: '#FF3B30',
                 borderRadius: 8,
@@ -206,52 +185,15 @@ export default function TabOneScreen() {
               <Text style={{ color: '#fff', fontSize: 14 }}>{error}</Text>
             </View>
           ) : null}
-          <Host matchContents style={{ width: '100%', height: 300 }}>
-            <HStack spacing={12}>
-              <VStack
-                modifiers={[
-                  glassEffect({
-                    shape: 'capsule',
-                    glass: {
-                      interactive: true,
-                      variant: 'clear',
-                    },
-                  }),
-                ]}
-              >
-                <TextField
-                  ref={fieldRef}
-                  modifiers={[padding({ horizontal: 12, vertical: 6 })]}
-                  autocorrection={false}
-                  onChangeText={setValue}
-                />
-              </VStack>
-              <Button
-                systemImage={
-                  isRecording || isTranscribing ? undefined : 'mic.fill'
-                }
-                variant={isRecording ? 'glassProminent' : 'glass'}
-                onPress={handleVoiceRecording}
-                disabled={isTranscribing || isLoading}
-              >
-                {(isRecording || isTranscribing) && (
-                  <CircularProgress color="#fff" />
-                )}
-              </Button>
-              <Button
-                systemImage={isLoading ? undefined : 'checkmark'}
-                variant="glassProminent"
-                onPress={async () => {
-                  await handlePersonSubmit();
-                  setValue('');
-                  fieldRef.current?.setText('');
-                }}
-                disabled={isRecording || isTranscribing}
-              >
-                <CircularProgress color="#fff" />
-              </Button>
-            </HStack>
-          </Host>
+          <PeopleInput
+            value={value}
+            onChangeText={setValue}
+            isRecording={isRecording}
+            isTranscribing={isTranscribing}
+            isLoading={isLoading}
+            onVoiceRecording={handleVoiceRecording}
+            onSubmit={handlePersonSubmit}
+          />
         </View>
       </KeyboardAvoidingView>
       <KeyboardToolbar enabled={Platform.OS === 'ios'}>
@@ -260,127 +202,3 @@ export default function TabOneScreen() {
     </>
   );
 }
-
-const RecentPeople = ({ people }: { people: Person[] }) => {
-  return (
-    <View style={{ backgroundColor: '#D9D9D9', gap: 10, width: '100%' }}>
-      {people.map((person) => (
-        <PersonCard key={person.id} person={person} />
-      ))}
-    </View>
-  );
-};
-
-const PersonCard = ({ person }: { person: Person }) => {
-  const scale = useSharedValue(1);
-  const backgroundColor = useThemeColor({}, 'background');
-  const { getEventsForTime, hasPermission } = useCalendarEvents();
-  const [calendarContext, setCalendarContext] = useState<string | null>(null);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-
-  // Fetch calendar context when component mounts
-  useEffect(() => {
-    if (hasPermission !== false) {
-      getCalendarContext(person.createdAt, getEventsForTime)
-        .then(setCalendarContext)
-        .catch((err) => {
-          console.error('Error fetching calendar context:', err);
-        });
-    }
-  }, [person.createdAt, getEventsForTime, hasPermission]);
-
-  const handleLongPress = () => {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ['Cancel', 'Delete'],
-          destructiveButtonIndex: 1,
-          cancelButtonIndex: 0,
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 1) {
-            handleDeletePerson(person.id);
-          }
-        }
-      );
-    } else {
-      Alert.alert(
-        'Delete Person',
-        `Are you sure you want to delete ${person.name}?`,
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => handleDeletePerson(person.id),
-          },
-        ]
-      );
-    }
-  };
-
-  const handlePressIn = () => {
-    scale.value = withTiming(0.95, { duration: 400 });
-  };
-
-  const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 400 });
-  };
-
-  return (
-    <Pressable
-      onLongPress={handleLongPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      style={{ width: '100%' }}
-    >
-      <Animated.View
-        style={[
-          {
-            gap: 6,
-            padding: 12,
-            borderRadius: 18,
-            backgroundColor,
-            width: '100%',
-          },
-          animatedStyle,
-        ]}
-      >
-        <Text style={{ fontWeight: 'bold' }}>{person.name}</Text>
-        {person.description ? <Text>{person.description}</Text> : null}
-        {calendarContext ? (
-          <Text style={{ fontSize: 12, fontStyle: 'italic', color: '#666' }}>
-            {calendarContext}
-          </Text>
-        ) : null}
-        <Text style={{ fontSize: 12 }}>
-          {format(person.createdAt, 'MMM do pp')}
-        </Text>
-      </Animated.View>
-    </Pressable>
-  );
-};
-
-const handleDeletePerson = async (personId: string): Promise<void> => {
-  try {
-    const now = new Date();
-    await db
-      .update(peopleTable)
-      .set({ deletedAt: now, updatedAt: now })
-      .where(eq(peopleTable.id, personId));
-    console.log('Soft deleted person:', personId);
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : 'Failed to delete person';
-    console.error('Error deleting person:', err);
-    Alert.alert('Error', message);
-  }
-};
