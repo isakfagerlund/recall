@@ -81,15 +81,12 @@ export default function TabOneScreen() {
       const result = await generateObject<typeof generatePersonSchema>({
         model: apple(),
         prompt: `
-      You are extracting structured info about ONE person.
-      
-      Generate a well structured sentence in the description field from all the different inputs you get. Don not include the name in the description field.
-      
-      If you cant figure out a description just pass an empty string. do not make up info from data that is not passed. I don't want any description that is not based on the input
+          You extract structured info about ONE person.
+          Do not include the name in the description.
+          If you cannot derive a description from the input, return an empty string. Do not invent details.
 
-      Input:
-      ${value}
-      `,
+          Input: ${value}
+        `,
         schema: generatePersonSchema,
       });
 
