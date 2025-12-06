@@ -1,5 +1,5 @@
-import * as Calendar from 'expo-calendar';
-import { format } from 'date-fns';
+import * as Calendar from "expo-calendar";
+import { format } from "date-fns";
 
 /**
  * Find the best matching calendar event for a given timestamp
@@ -7,7 +7,7 @@ import { format } from 'date-fns';
  */
 export function findBestMatchingEvent(
   events: Calendar.Event[],
-  timestamp: Date
+  timestamp: Date,
 ): Calendar.Event | null {
   if (events.length === 0) {
     return null;
@@ -36,8 +36,8 @@ export function findBestMatchingEvent(
  */
 export function formatEventDescription(event: Calendar.Event): string {
   const eventStart = new Date(event.startDate);
-  const timeStr = format(eventStart, 'h:mm a');
-  const title = event.title ?? 'event';
+  const timeStr = format(eventStart, "h:mm a");
+  const title = event.title ?? "event";
 
   return `Met during ${title} ${timeStr}`;
 }
@@ -50,8 +50,8 @@ export async function getCalendarContext(
   timestamp: Date,
   getEventsForTime: (
     timestamp: Date,
-    windowHours?: number
-  ) => Promise<Calendar.Event[]>
+    windowHours?: number,
+  ) => Promise<Calendar.Event[]>,
 ): Promise<string | null> {
   try {
     const events = await getEventsForTime(timestamp, 1);
@@ -63,7 +63,7 @@ export async function getCalendarContext(
 
     return formatEventDescription(matchingEvent);
   } catch (err) {
-    console.error('Error getting calendar context:', err);
+    console.error("Error getting calendar context:", err);
     return null;
   }
 }

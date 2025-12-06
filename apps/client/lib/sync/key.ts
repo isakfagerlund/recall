@@ -1,7 +1,7 @@
-import * as SecureStore from 'expo-secure-store';
-import * as Crypto from 'expo-crypto';
+import * as SecureStore from "expo-secure-store";
+import * as Crypto from "expo-crypto";
 
-const SYNC_KEY_STORAGE_KEY = 'recall_sync_key';
+const SYNC_KEY_STORAGE_KEY = "recall_sync_key";
 
 /**
  * Generate a new sync key (32 bytes, base64 encoded)
@@ -10,7 +10,7 @@ export async function generateSyncKey(): Promise<string> {
   const randomBytes = await Crypto.getRandomBytesAsync(32);
   const key = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
-    randomBytes.join('')
+    randomBytes.join(""),
   );
   return key;
 }
@@ -20,12 +20,12 @@ export async function generateSyncKey(): Promise<string> {
  */
 export async function getSyncKey(): Promise<string> {
   let key = await SecureStore.getItemAsync(SYNC_KEY_STORAGE_KEY);
-  
+
   if (!key) {
     key = await generateSyncKey();
     await SecureStore.setItemAsync(SYNC_KEY_STORAGE_KEY, key);
   }
-  
+
   return key;
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -8,16 +8,16 @@ import {
   Pressable,
   View,
   Animated,
-} from 'react-native';
-import * as Clipboard from 'expo-clipboard';
-import * as Haptics from 'expo-haptics';
-import { useFocusEffect, router } from 'expo-router';
+} from "react-native";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
+import { useFocusEffect, router } from "expo-router";
 
-import { db } from '@/db';
-import { people as peopleTable } from '@/db/schema';
-import { desc } from 'drizzle-orm';
-import { getSyncKey } from '@/lib/sync/key';
-import { performSync } from '@/lib/sync/sync';
+import { db } from "@/db";
+import { people as peopleTable } from "@/db/schema";
+import { desc } from "drizzle-orm";
+import { getSyncKey } from "@/lib/sync/key";
+import { performSync } from "@/lib/sync/sync";
 
 export default function SettingsScreen() {
   const [syncKey, setSyncKeyState] = useState<string | null>(null);
@@ -35,8 +35,8 @@ export default function SettingsScreen() {
       const key = await getSyncKey();
       setSyncKeyState(key);
     } catch (err) {
-      console.error('Error loading sync key', err);
-      setError('Failed to load sync key');
+      console.error("Error loading sync key", err);
+      setError("Failed to load sync key");
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +58,7 @@ export default function SettingsScreen() {
         }
       }
     } catch (err) {
-      console.error('Error loading last sync:', err);
+      console.error("Error loading last sync:", err);
     }
   }, []);
 
@@ -66,7 +66,7 @@ export default function SettingsScreen() {
     useCallback(() => {
       loadSyncKey();
       loadLastSync();
-    }, [loadSyncKey, loadLastSync])
+    }, [loadSyncKey, loadLastSync]),
   );
 
   const handleCopyKey = async () => {
@@ -95,13 +95,13 @@ export default function SettingsScreen() {
         setCopied(false);
       });
     } catch (err) {
-      console.error('Error copying key', err);
+      console.error("Error copying key", err);
     }
   };
 
   const handleSync = async () => {
     if (!syncKey) {
-      setError('No sync key available');
+      setError("No sync key available");
       return;
     }
     setIsSyncing(true);
@@ -109,12 +109,12 @@ export default function SettingsScreen() {
     try {
       await performSync(syncKey);
       await loadLastSync();
-      Alert.alert('Success', 'Sync completed successfully');
+      Alert.alert("Success", "Sync completed successfully");
     } catch (err) {
-      console.error('Sync failed', err);
-      const message = err instanceof Error ? err.message : 'Sync failed';
+      console.error("Sync failed", err);
+      const message = err instanceof Error ? err.message : "Sync failed";
       setError(message);
-      Alert.alert('Sync Failed', message);
+      Alert.alert("Sync Failed", message);
     } finally {
       setIsSyncing(false);
     }
@@ -122,24 +122,24 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: '#D9D9D9' }}
+      style={{ flex: 1, backgroundColor: "#D9D9D9" }}
       contentContainerStyle={{ paddingHorizontal: 14, gap: 16 }}
     >
-      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Settings</Text>
+      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Settings</Text>
 
       <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 16, fontWeight: '600' }}>Sync Key</Text>
+        <Text style={{ fontSize: 16, fontWeight: "600" }}>Sync Key</Text>
         <Pressable
           onPress={handleCopyKey}
           disabled={isLoading || !syncKey}
           style={{
-            backgroundColor: '#f0f0f0',
+            backgroundColor: "#f0f0f0",
             padding: 12,
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: '#ddd',
+            borderColor: "#ddd",
             minHeight: 50,
-            justifyContent: 'center',
+            justifyContent: "center",
             opacity: isLoading || !syncKey ? 0.6 : 1,
           }}
         >
@@ -147,32 +147,32 @@ export default function SettingsScreen() {
             <ActivityIndicator />
           ) : (
             <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
             >
               <Text
                 style={{
                   fontSize: 12,
-                  fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+                  fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
                   flex: 1,
                 }}
                 numberOfLines={2}
               >
-                {syncKey ?? 'Not available'}
+                {syncKey ?? "Not available"}
               </Text>
               {copied && (
                 <Animated.View
                   style={{
                     opacity: fadeAnim,
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     gap: 4,
                   }}
                 >
                   <Text
                     style={{
                       fontSize: 14,
-                      color: '#34C759',
-                      fontWeight: '600',
+                      color: "#34C759",
+                      fontWeight: "600",
                     }}
                   >
                     ✓
@@ -180,8 +180,8 @@ export default function SettingsScreen() {
                   <Text
                     style={{
                       fontSize: 12,
-                      color: '#34C759',
-                      fontWeight: '600',
+                      color: "#34C759",
+                      fontWeight: "600",
                     }}
                   >
                     Copied
@@ -191,27 +191,27 @@ export default function SettingsScreen() {
             </View>
           )}
         </Pressable>
-        <Text style={{ fontSize: 12, color: '#666' }}>
+        <Text style={{ fontSize: 12, color: "#666" }}>
           Tap the sync key to copy it.
         </Text>
         <Pressable
-          onPress={() => router.push('/change-sync-key')}
+          onPress={() => router.push("/change-sync-key")}
           style={{
-            backgroundColor: '#007AFF',
+            backgroundColor: "#007AFF",
             paddingVertical: 12,
             paddingHorizontal: 16,
             borderRadius: 8,
-            alignItems: 'center',
+            alignItems: "center",
           }}
         >
-          <Text style={{ color: '#fff', fontWeight: '600' }}>
+          <Text style={{ color: "#fff", fontWeight: "600" }}>
             Change sync key
           </Text>
         </Pressable>
       </View>
 
       {lastSync && (
-        <Text style={{ fontSize: 12, color: '#666' }}>
+        <Text style={{ fontSize: 12, color: "#666" }}>
           Last synced: {lastSync.toLocaleString()}
         </Text>
       )}
@@ -219,14 +219,14 @@ export default function SettingsScreen() {
       {error && (
         <View
           style={{
-            backgroundColor: '#fee',
+            backgroundColor: "#fee",
             padding: 12,
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: '#fcc',
+            borderColor: "#fcc",
           }}
         >
-          <Text style={{ color: '#c00', fontSize: 12 }}>{error}</Text>
+          <Text style={{ color: "#c00", fontSize: 12 }}>{error}</Text>
         </View>
       )}
 
@@ -235,16 +235,16 @@ export default function SettingsScreen() {
         disabled={isSyncing || isLoading || !syncKey}
         style={{
           backgroundColor:
-            isSyncing || isLoading || !syncKey ? '#ccc' : '#007AFF',
+            isSyncing || isLoading || !syncKey ? "#ccc" : "#007AFF",
           paddingVertical: 16,
           borderRadius: 10,
-          alignItems: 'center',
+          alignItems: "center",
         }}
       >
         {isSyncing ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={{ color: '#fff', fontWeight: '700' }}>Sync Now</Text>
+          <Text style={{ color: "#fff", fontWeight: "700" }}>Sync Now</Text>
         )}
       </Pressable>
     </ScrollView>

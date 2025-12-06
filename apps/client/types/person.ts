@@ -1,4 +1,4 @@
-import z from 'zod/v4';
+import z from "zod/v4";
 
 export const generatePersonSchema = z.object({
   name: z.string(),

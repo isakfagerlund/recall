@@ -1,12 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
-import * as Calendar from 'expo-calendar';
+import { useState, useCallback, useEffect } from "react";
+import * as Calendar from "expo-calendar";
 
 interface UseCalendarEventsReturn {
   hasPermission: boolean | null;
   requestPermission: () => Promise<boolean>;
   getEventsForTime: (
     timestamp: Date,
-    windowHours?: number
+    windowHours?: number,
   ) => Promise<Calendar.Event[]>;
 }
 
@@ -24,9 +24,9 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
   const checkPermissionStatus = useCallback(async () => {
     try {
       const { status } = await Calendar.getCalendarPermissionsAsync();
-      setHasPermission(status === 'granted');
+      setHasPermission(status === "granted");
     } catch (err) {
-      console.error('Error checking calendar permissions:', err);
+      console.error("Error checking calendar permissions:", err);
       setHasPermission(false);
     }
   }, []);
@@ -34,11 +34,11 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
   const requestPermission = useCallback(async (): Promise<boolean> => {
     try {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
-      const granted = status === 'granted';
+      const granted = status === "granted";
       setHasPermission(granted);
       return granted;
     } catch (err) {
-      console.error('Error requesting calendar permissions:', err);
+      console.error("Error requesting calendar permissions:", err);
       setHasPermission(false);
       return false;
     }
@@ -47,7 +47,7 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
   const getEventsForTime = useCallback(
     async (
       timestamp: Date,
-      windowHours: number = 1
+      windowHours: number = 1,
     ): Promise<Calendar.Event[]> => {
       // If permission not granted, return empty array
       if (hasPermission === false) {
@@ -65,7 +65,7 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
       try {
         // Get all calendars
         const calendars = await Calendar.getCalendarsAsync(
-          Calendar.EntityTypes.EVENT
+          Calendar.EntityTypes.EVENT,
         );
         const calendarIds = calendars.map((cal) => cal.id);
 
@@ -84,16 +84,16 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
         const events = await Calendar.getEventsAsync(
           calendarIds,
           startDate,
-          endDate
+          endDate,
         );
 
         return events;
       } catch (err) {
-        console.error('Error fetching calendar events:', err);
+        console.error("Error fetching calendar events:", err);
         return [];
       }
     },
-    [hasPermission, requestPermission]
+    [hasPermission, requestPermission],
   );
 
   return {

@@ -47,9 +47,10 @@
     "plugins": [
       "expo-router",
       "expo-contacts",
-      ["expo-calendar",
+      [
+        "expo-calendar",
         {
-        "calendarPermission": "Allow $(PRODUCT_NAME) to access your calendar to match people with events."
+          "calendarPermission": "Allow $(PRODUCT_NAME) to access your calendar to match people with events."
         }
       ],
       [

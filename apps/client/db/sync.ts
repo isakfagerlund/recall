@@ -1,41 +1,39 @@
-import { db } from '@/db';
-import { people as peopleTable, PersonRow } from '@/db/schema';
-import { Person } from '@/types/person';
-import { eq } from 'drizzle-orm';
+import { db } from "@/db";
+import { people as peopleTable, PersonRow } from "@/db/schema";
+import { Person } from "@/types/person";
+import { eq } from "drizzle-orm";
 
 /**
  * Get all people for sync (including soft-deleted)
  */
 export async function getAllPeopleForSync(): Promise<Person[]> {
   const rows = await db.select().from(peopleTable);
-  
+
   return rows.map((row: PersonRow) => ({
     id: row.id,
     name: row.name,
-    description: row.description ?? '',
+    description: row.description ?? "",
     createdAt:
       row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
     updatedAt:
       row.updatedAt instanceof Date
         ? row.updatedAt
         : row.updatedAt
-        ? new Date(row.updatedAt)
-        : undefined,
+          ? new Date(row.updatedAt)
+          : undefined,
     deletedAt:
       row.deletedAt instanceof Date
         ? row.deletedAt
         : row.deletedAt
-        ? new Date(row.deletedAt)
-        : undefined,
+          ? new Date(row.deletedAt)
+          : undefined,
   }));
 }
 
 /**
  * Upsert people from sync data, handling conflicts with last-write-wins
  */
-export async function upsertPeopleFromSync(
-  people: Person[]
-): Promise<void> {
+export async function upsertPeopleFromSync(people: Person[]): Promise<void> {
   for (const person of people) {
     const existing = await db
       .select()
@@ -49,16 +47,13 @@ export async function upsertPeopleFromSync(
         existingPerson.updatedAt instanceof Date
           ? existingPerson.updatedAt
           : existingPerson.updatedAt
-          ? new Date(existingPerson.updatedAt)
-          : null;
-      
+            ? new Date(existingPerson.updatedAt)
+            : null;
+
       const incomingUpdatedAt = person.updatedAt ?? person.createdAt;
-      
+
       // Last-write-wins: if incoming is newer or equal, update
-      if (
-        !existingUpdatedAt ||
-        incomingUpdatedAt >= existingUpdatedAt
-      ) {
+      if (!existingUpdatedAt || incomingUpdatedAt >= existingUpdatedAt) {
         await db
           .update(peopleTable)
           .set({

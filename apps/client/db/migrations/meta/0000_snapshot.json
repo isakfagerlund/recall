@@ -67,30 +67,22 @@
       "indexes": {
         "people_created_at_idx": {
           "name": "people_created_at_idx",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         },
         "people_name_idx": {
           "name": "people_name_idx",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": false
         },
         "people_deleted_at_idx": {
           "name": "people_deleted_at_idx",
-          "columns": [
-            "deleted_at"
-          ],
+          "columns": ["deleted_at"],
           "isUnique": false
         },
         "people_synced_at_idx": {
           "name": "people_synced_at_idx",
-          "columns": [
-            "synced_at"
-          ],
+          "columns": ["synced_at"],
           "isUnique": false
         }
       },

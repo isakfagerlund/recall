@@ -13,6 +13,7 @@
     "deploy:api": "bun --filter api deploy"
   },
   "devDependencies": {
+    "prettier": "3.7.4",
     "turbo": "^2.0.0",
     "typescript": "~5.9.2"
   },

@@ -1,10 +1,10 @@
-import * as Crypto from 'expo-crypto';
+import * as Crypto from "expo-crypto";
 import {
   getAllPeopleForSync,
   upsertPeopleFromSync,
   markAsSynced,
-} from '@/db/sync';
-import { Person } from '@/types/person';
+} from "@/db/sync";
+import { Person } from "@/types/person";
 
 /**
  * Get the API URL based on environment
@@ -12,7 +12,7 @@ import { Person } from '@/types/person';
 function getApiUrl(): string {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (!apiUrl) {
-    throw new Error('EXPO_PUBLIC_API_URL environment variable is required');
+    throw new Error("EXPO_PUBLIC_API_URL environment variable is required");
   }
   return `${apiUrl}/sync`;
 }
@@ -23,7 +23,7 @@ function getApiUrl(): string {
 function getApiKey(): string {
   const apiKey = process.env.EXPO_PUBLIC_API_KEY;
   if (!apiKey) {
-    throw new Error('EXPO_PUBLIC_API_KEY environment variable is required');
+    throw new Error("EXPO_PUBLIC_API_KEY environment variable is required");
   }
   return apiKey;
 }
@@ -39,7 +39,7 @@ async function createHmacSignature(data: string, key: string): Promise<string> {
   const signature = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
     combined,
-    { encoding: Crypto.CryptoEncoding.BASE64 }
+    { encoding: Crypto.CryptoEncoding.BASE64 },
   );
   return signature;
 }
@@ -56,7 +56,7 @@ export async function exportData(): Promise<Person[]> {
  */
 export async function importData(people: Person[]): Promise<void> {
   const normalizeDate = (
-    value: Date | string | number | null | undefined
+    value: Date | string | number | null | undefined,
   ): Date | undefined => {
     if (!value) return undefined;
     if (value instanceof Date) return value;
@@ -90,9 +90,9 @@ export async function syncToServer(syncKey: string): Promise<void> {
   // Encryption can be added later if needed
   const apiKey = getApiKey();
   const response = await fetch(`${apiUrl}/push`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
@@ -123,15 +123,15 @@ export async function syncFromServer(syncKey: string): Promise<void> {
 
   const response = await fetch(
     `${apiUrl}/pull?syncKey=${encodeURIComponent(
-      syncKey
+      syncKey,
     )}&timestamp=${timestamp}&signature=${encodeURIComponent(signature)}`,
     {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-    }
+    },
   );
 
   if (!response.ok) {

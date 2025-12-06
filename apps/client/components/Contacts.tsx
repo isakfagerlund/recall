@@ -1,8 +1,8 @@
-import { spacing } from '@/constants/spacing';
-import { typography } from '@/constants/typography';
-import * as Contacts from 'expo-contacts';
-import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { spacing } from "@/constants/spacing";
+import { typography } from "@/constants/typography";
+import * as Contacts from "expo-contacts";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 export default function ContactsComponent() {
   const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
@@ -10,7 +10,7 @@ export default function ContactsComponent() {
   useEffect(() => {
     (async () => {
       const { status } = await Contacts.requestPermissionsAsync();
-      if (status === 'granted') {
+      if (status === "granted") {
         const { data } = await Contacts.getContactsAsync({
           fields: [Contacts.Fields.Emails],
         });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Alert,
   Platform,
@@ -7,16 +7,16 @@ import {
   TextInput,
   Pressable,
   View,
-} from 'react-native';
-import * as Clipboard from 'expo-clipboard';
-import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+} from "react-native";
+import * as Clipboard from "expo-clipboard";
+import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
-import { setSyncKey } from '@/lib/sync/key';
-import { markAllAsUnsynced } from '@/db/sync';
+import { setSyncKey } from "@/lib/sync/key";
+import { markAllAsUnsynced } from "@/db/sync";
 
 export default function ChangeSyncKeyModal() {
-  const [pastedKey, setPastedKey] = useState('');
+  const [pastedKey, setPastedKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isApplying, setIsApplying] = useState(false);
 
@@ -26,14 +26,14 @@ export default function ChangeSyncKeyModal() {
       setPastedKey(value.trim());
       setError(null);
     } catch (err) {
-      console.error('Error pasting from clipboard', err);
-      setError('Failed to read clipboard');
+      console.error("Error pasting from clipboard", err);
+      setError("Failed to read clipboard");
     }
   };
 
   const applyPastedKey = async () => {
     if (!pastedKey.trim()) {
-      setError('Please enter a sync key to apply');
+      setError("Please enter a sync key to apply");
       return;
     }
 
@@ -43,18 +43,18 @@ export default function ChangeSyncKeyModal() {
     try {
       await setSyncKey(pastedKey.trim());
       await markAllAsUnsynced();
-      Alert.alert('Sync key updated', 'New key applied. Please sync now.', [
+      Alert.alert("Sync key updated", "New key applied. Please sync now.", [
         {
-          text: 'OK',
+          text: "OK",
           onPress: () => {
             router.back();
           },
         },
       ]);
     } catch (err) {
-      console.error('Error applying key', err);
+      console.error("Error applying key", err);
       const message =
-        err instanceof Error ? err.message : 'Failed to apply key';
+        err instanceof Error ? err.message : "Failed to apply key";
       setError(message);
     } finally {
       setIsApplying(false);
@@ -67,17 +67,17 @@ export default function ChangeSyncKeyModal() {
 
   return (
     <>
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
+      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
       <ScrollView
-        style={{ flex: 1, backgroundColor: '#D9D9D9' }}
+        style={{ flex: 1, backgroundColor: "#D9D9D9" }}
         contentContainerStyle={{ padding: 20, gap: 16 }}
       >
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
+        <Text style={{ fontSize: 24, fontWeight: "bold" }}>
           Change Sync Key
         </Text>
 
         <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 16, fontWeight: '600' }}>
+          <Text style={{ fontSize: 16, fontWeight: "600" }}>
             Paste Sync Key
           </Text>
           <TextInput
@@ -88,14 +88,14 @@ export default function ChangeSyncKeyModal() {
             }}
             placeholder="Paste a sync key"
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: "#fff",
               borderRadius: 8,
               borderWidth: 1,
-              borderColor: '#ccc',
+              borderColor: "#ccc",
               paddingHorizontal: 12,
               paddingVertical: 10,
               minHeight: 100,
-              fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+              fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
               fontSize: 12,
             }}
             multiline
@@ -105,53 +105,53 @@ export default function ChangeSyncKeyModal() {
           <Pressable
             onPress={handlePasteFromClipboard}
             style={{
-              backgroundColor: '#007AFF',
+              backgroundColor: "#007AFF",
 
               paddingVertical: 12,
               paddingHorizontal: 16,
               borderRadius: 8,
-              alignItems: 'center',
+              alignItems: "center",
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>
+            <Text style={{ color: "#fff", fontWeight: "600" }}>
               Paste from clipboard
             </Text>
           </Pressable>
         </View>
 
-        <Text style={{ fontSize: 12, color: '#666' }}>
+        <Text style={{ fontSize: 12, color: "#666" }}>
           Applying a key replaces the current one. Old keys will no longer sync.
         </Text>
 
         {error && (
           <View
             style={{
-              backgroundColor: '#fee',
+              backgroundColor: "#fee",
               padding: 12,
               borderRadius: 8,
               borderWidth: 1,
-              borderColor: '#fcc',
+              borderColor: "#fcc",
             }}
           >
-            <Text style={{ color: '#c00', fontSize: 12 }}>{error}</Text>
+            <Text style={{ color: "#c00", fontSize: 12 }}>{error}</Text>
           </View>
         )}
 
-        <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flexDirection: "row", gap: 12 }}>
           <Pressable
             onPress={handleCancel}
             disabled={isApplying}
             style={{
               flex: 1,
-              backgroundColor: '#fff',
+              backgroundColor: "#fff",
               paddingVertical: 12,
               paddingHorizontal: 16,
               borderRadius: 8,
-              alignItems: 'center',
+              alignItems: "center",
               opacity: isApplying ? 0.6 : 1,
             }}
           >
-            <Text style={{ color: '#007AFF', fontWeight: '600' }}>Cancel</Text>
+            <Text style={{ color: "#007AFF", fontWeight: "600" }}>Cancel</Text>
           </Pressable>
           <Pressable
             onPress={applyPastedKey}
@@ -159,15 +159,15 @@ export default function ChangeSyncKeyModal() {
             style={{
               flex: 1,
               backgroundColor:
-                isApplying || !pastedKey.trim() ? '#ccc' : '#007AFF',
+                isApplying || !pastedKey.trim() ? "#ccc" : "#007AFF",
               paddingVertical: 12,
               paddingHorizontal: 16,
               borderRadius: 8,
-              alignItems: 'center',
+              alignItems: "center",
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>
-              {isApplying ? 'Applying...' : 'Apply key'}
+            <Text style={{ color: "#fff", fontWeight: "600" }}>
+              {isApplying ? "Applying..." : "Apply key"}
             </Text>
           </Pressable>
         </View>

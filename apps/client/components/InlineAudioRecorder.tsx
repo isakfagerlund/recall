@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import React, { useEffect, useState } from "react";
+import { View, Text, Button, StyleSheet, Alert } from "react-native";
 import {
   AudioModule,
   useAudioRecorder,
@@ -7,8 +7,8 @@ import {
   RecordingPresets,
   setAudioModeAsync,
   useAudioPlayer,
-} from 'expo-audio';
-import { createStyles } from '@/theme/styles';
+} from "expo-audio";
+import { createStyles } from "@/theme/styles";
 
 export default function InlineAudioRecorder() {
   const player = useAudioPlayer();
@@ -36,7 +36,7 @@ export default function InlineAudioRecorder() {
     (async () => {
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
-        Alert.alert('Permission to access microphone was denied');
+        Alert.alert("Permission to access microphone was denied");
       }
 
       setAudioModeAsync({
@@ -49,7 +49,7 @@ export default function InlineAudioRecorder() {
   return (
     <View style={styles.container}>
       <Button
-        title={recorderState.isRecording ? 'Stop Recording' : 'Start Recording'}
+        title={recorderState.isRecording ? "Stop Recording" : "Start Recording"}
         onPress={recorderState.isRecording ? stopRecording : record}
       />
       <Text style={createStyles.buttonPrimary}>Recording: {recording}</Text>
@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
   container: { padding: 16 },
   link: {
     marginTop: 12,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
 });

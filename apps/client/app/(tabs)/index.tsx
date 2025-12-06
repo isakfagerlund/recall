@@ -1,29 +1,29 @@
-import { View } from '@/components/Themed';
-import React, { useEffect, useState } from 'react';
-import { apple } from '@react-native-ai/apple';
-import { generateObject } from 'ai';
-import { generatePersonSchema, Person } from '@/types/person';
+import { View } from "@/components/Themed";
+import React, { useEffect, useState } from "react";
+import { apple } from "@react-native-ai/apple";
+import { generateObject } from "ai";
+import { generatePersonSchema, Person } from "@/types/person";
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-} from 'react-native';
-import { useVoiceToText } from '@/components/useVoiceToText';
-import { KeyboardToolbar } from 'react-native-keyboard-controller';
-import * as Crypto from 'expo-crypto';
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { db } from '@/db';
-import { people as peopleTable, PersonRow } from '@/db/schema';
-import { desc, isNull } from 'drizzle-orm';
-import { RecentPeople } from '@/components/RecentPeople';
-import { PeopleInput } from '@/components/PeopleInput';
+} from "react-native";
+import { useVoiceToText } from "@/components/useVoiceToText";
+import { KeyboardToolbar } from "react-native-keyboard-controller";
+import * as Crypto from "expo-crypto";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { db } from "@/db";
+import { people as peopleTable, PersonRow } from "@/db/schema";
+import { desc, isNull } from "drizzle-orm";
+import { RecentPeople } from "@/components/RecentPeople";
+import { PeopleInput } from "@/components/PeopleInput";
 
 export default function TabOneScreen() {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [keyboardOpen, setKeyobardOpen] = useState(false);
   const {
     isRecording,
@@ -41,7 +41,7 @@ export default function TabOneScreen() {
       .select()
       .from(peopleTable)
       .where(isNull(peopleTable.deletedAt))
-      .orderBy(desc(peopleTable.createdAt))
+      .orderBy(desc(peopleTable.createdAt)),
   );
 
   // Convert database rows to Person type
@@ -50,31 +50,31 @@ export default function TabOneScreen() {
     peopleData?.map((row: PersonRow) => ({
       id: row.id,
       name: row.name,
-      description: row.description ?? '',
+      description: row.description ?? "",
       createdAt:
         row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
       updatedAt:
         row.updatedAt instanceof Date
           ? row.updatedAt
           : row.updatedAt
-          ? new Date(row.updatedAt)
-          : undefined,
+            ? new Date(row.updatedAt)
+            : undefined,
       deletedAt:
         row.deletedAt instanceof Date
           ? row.deletedAt
           : row.deletedAt
-          ? new Date(row.deletedAt)
-          : undefined,
+            ? new Date(row.deletedAt)
+            : undefined,
     })) ?? [];
 
   const handlePersonSubmit = async (): Promise<void> => {
     if (!value.trim()) {
-      setError('Please enter a person description');
+      setError("Please enter a person description");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await generateObject<typeof generatePersonSchema>({
@@ -104,14 +104,14 @@ export default function TabOneScreen() {
         updatedAt: null,
       });
 
-      setValue('');
+      setValue("");
       Keyboard.dismiss();
-      console.log('Saved person to database:', personId);
+      console.log("Saved person to database:", personId);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to generate person data';
+        err instanceof Error ? err.message : "Failed to generate person data";
       setError(message);
-      console.error('Error generating person:', err);
+      console.error("Error generating person:", err);
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +119,7 @@ export default function TabOneScreen() {
 
   const handleVoiceRecording = async (): Promise<void> => {
     try {
-      setError(''); // Clear any previous errors
+      setError(""); // Clear any previous errors
       if (isRecording) {
         // Stop recording and transcribe
         const transcribedText = await stopRecording();
@@ -128,7 +128,7 @@ export default function TabOneScreen() {
         } else {
           // If transcription failed, error is already set by the hook
           if (!voiceError) {
-            setError('Failed to transcribe audio. Please try again.');
+            setError("Failed to transcribe audio. Please try again.");
           }
         }
       } else {
@@ -137,23 +137,23 @@ export default function TabOneScreen() {
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to record audio';
+        err instanceof Error ? err.message : "Failed to record audio";
       setError(message);
-      console.error('Error with voice recording:', err);
+      console.error("Error with voice recording:", err);
     }
   };
 
   useEffect(() => {
     const showEvent =
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
     const hideEvent =
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
     const showSub = Keyboard.addListener(showEvent, () =>
-      setKeyobardOpen(true)
+      setKeyobardOpen(true),
     );
     const hideSub = Keyboard.addListener(hideEvent, () =>
-      setKeyobardOpen(false)
+      setKeyobardOpen(false),
     );
 
     return () => {
@@ -172,23 +172,23 @@ export default function TabOneScreen() {
   return (
     <>
       <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: '#D9D9D9', paddingHorizontal: 14 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1, backgroundColor: "#D9D9D9", paddingHorizontal: 14 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
         <View
           style={{
             flex: 1,
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backgroundColor: '#D9D9D9',
+            alignItems: "center",
+            justifyContent: "space-between",
+            backgroundColor: "#D9D9D9",
             paddingTop: 72,
             paddingBottom: keyboardOpen ? 72 : 124,
             gap: 18,
           }}
         >
           <ScrollView
-            style={{ width: '100%' }}
+            style={{ width: "100%" }}
             keyboardShouldPersistTaps="handled"
           >
             {people.length > 0 && <RecentPeople people={people} />}
@@ -197,14 +197,14 @@ export default function TabOneScreen() {
             <View
               style={{
                 flex: 1,
-                width: '100%',
+                width: "100%",
                 padding: 12,
-                backgroundColor: '#FF3B30',
+                backgroundColor: "#FF3B30",
                 borderRadius: 8,
                 marginBottom: 8,
               }}
             >
-              <Text style={{ color: '#fff', fontSize: 14 }}>{error}</Text>
+              <Text style={{ color: "#fff", fontSize: 14 }}>{error}</Text>
             </View>
           ) : null}
           <PeopleInput
@@ -218,7 +218,7 @@ export default function TabOneScreen() {
           />
         </View>
       </KeyboardAvoidingView>
-      <KeyboardToolbar enabled={Platform.OS === 'ios'}>
+      <KeyboardToolbar enabled={Platform.OS === "ios"}>
         <KeyboardToolbar.Done onPress={() => Keyboard.dismiss()} />
       </KeyboardToolbar>
     </>

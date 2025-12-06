@@ -1,16 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import {
   AudioModule,
   useAudioRecorder,
   useAudioRecorderState,
   RecordingPresets,
   setAudioModeAsync,
-} from 'expo-audio';
-import { File } from 'expo-file-system';
-import Constants from 'expo-constants';
-import { Alert } from 'react-native';
-import { experimental_transcribe } from 'ai';
-import { apple } from '@react-native-ai/apple';
+} from "expo-audio";
+import { File } from "expo-file-system";
+import Constants from "expo-constants";
+import { Alert } from "react-native";
+import { experimental_transcribe } from "ai";
+import { apple } from "@react-native-ai/apple";
 
 /**
  * Get the API URL for transcription endpoint
@@ -18,7 +18,7 @@ import { apple } from '@react-native-ai/apple';
 function getTranscribeApiUrl(): string {
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
   if (!apiUrl) {
-    throw new Error('EXPO_PUBLIC_API_URL environment variable is required');
+    throw new Error("EXPO_PUBLIC_API_URL environment variable is required");
   }
   return `${apiUrl}/api/transcribe`;
 }
@@ -29,7 +29,7 @@ function getTranscribeApiUrl(): string {
 function getApiKey(): string {
   const apiKey = process.env.EXPO_PUBLIC_API_KEY;
   if (!apiKey) {
-    throw new Error('EXPO_PUBLIC_API_KEY environment variable is required');
+    throw new Error("EXPO_PUBLIC_API_KEY environment variable is required");
   }
   return apiKey;
 }
@@ -53,10 +53,10 @@ export function useVoiceToText(): UseVoiceToTextReturn {
     try {
       const status = await AudioModule.requestRecordingPermissionsAsync();
       if (!status.granted) {
-        setError('Microphone permission denied');
+        setError("Microphone permission denied");
         Alert.alert(
-          'Permission Required',
-          'Please allow microphone access to use voice-to-text'
+          "Permission Required",
+          "Please allow microphone access to use voice-to-text",
         );
         return false;
       }
@@ -69,7 +69,7 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       return true;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to request permissions';
+        err instanceof Error ? err.message : "Failed to request permissions";
       setError(message);
       return false;
     }
@@ -87,9 +87,9 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       audioRecorder.record();
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to start recording';
+        err instanceof Error ? err.message : "Failed to start recording";
       setError(message);
-      console.error('Error starting recording:', err);
+      console.error("Error starting recording:", err);
     }
   }, [audioRecorder, requestPermissions]);
 
@@ -105,7 +105,7 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       const audioUri = audioRecorder.uri;
 
       if (!audioUri) {
-        setError('No audio file recorded');
+        setError("No audio file recorded");
         return null;
       }
 
@@ -118,9 +118,9 @@ export function useVoiceToText(): UseVoiceToTextReturn {
     } catch (err) {
       setIsTranscribing(false);
       const message =
-        err instanceof Error ? err.message : 'Failed to stop recording';
+        err instanceof Error ? err.message : "Failed to stop recording";
       setError(message);
-      console.error('Error stopping recording:', err);
+      console.error("Error stopping recording:", err);
       return null;
     }
   }, [audioRecorder, recorderState.isRecording]);
@@ -138,21 +138,21 @@ export function useVoiceToText(): UseVoiceToTextReturn {
         const model = apple.transcriptionModel();
         const local_response = await model.doGenerate({
           audio: base64,
-          mediaType: 'audio',
+          mediaType: "audio",
           providerOptions: {
             apple: {
-              language: 'en_US',
+              language: "en_US",
             },
           },
         });
         localTranscription = local_response.text;
-        console.log('Local transcription successful:', localTranscription);
+        console.log("Local transcription successful:", localTranscription);
       } catch (localError) {
         // Apple transcription failed (likely assets not available)
         // This is expected on some devices/locales, so we'll fall back to OpenAI
         console.warn(
-          'Apple local transcription failed, falling back to OpenAI:',
-          localError
+          "Apple local transcription failed, falling back to OpenAI:",
+          localError,
         );
       }
 
@@ -160,21 +160,21 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       const apiUrl = getTranscribeApiUrl();
       const apiKey = getApiKey();
       const response = await fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           audio: base64,
-          format: 'm4a',
+          format: "m4a",
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
-          `Transcription failed: ${response.status} ${errorText}`
+          `Transcription failed: ${response.status} ${errorText}`,
         );
       }
 
@@ -185,9 +185,9 @@ export function useVoiceToText(): UseVoiceToTextReturn {
       return localTranscription ?? openAITranscription;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to transcribe audio';
+        err instanceof Error ? err.message : "Failed to transcribe audio";
       setError(message);
-      console.error('Error transcribing audio:', err);
+      console.error("Error transcribing audio:", err);
       throw err;
     }
   }

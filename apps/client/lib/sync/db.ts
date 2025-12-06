@@ -1,6 +1,6 @@
-import { neon } from '@neondatabase/serverless';
+import { neon } from "@neondatabase/serverless";
 
-const sql = neon(process.env.DATABASE_URL ?? '');
+const sql = neon(process.env.DATABASE_URL ?? "");
 
 /**
  * Initialize the sync_data table if it doesn't exist
@@ -20,10 +20,10 @@ export async function initializeDatabase(): Promise<void> {
  */
 export async function storeSyncData(
   syncKey: string,
-  encryptedData: string
+  encryptedData: string,
 ): Promise<void> {
   await initializeDatabase();
-  
+
   await sql`
     INSERT INTO sync_data (sync_key, encrypted_data, updated_at)
     VALUES (${syncKey}, ${encryptedData}, NOW())
@@ -37,22 +37,19 @@ export async function storeSyncData(
 /**
  * Get sync data for a given sync key
  */
-export async function getSyncData(
-  syncKey: string
-): Promise<string | null> {
+export async function getSyncData(syncKey: string): Promise<string | null> {
   await initializeDatabase();
-  
-  const result = await sql`
+
+  const result = (await sql`
     SELECT encrypted_data
     FROM sync_data
     WHERE sync_key = ${syncKey}
     LIMIT 1
-  ` as { encrypted_data: string }[];
-  
+  `) as { encrypted_data: string }[];
+
   if (result.length === 0) {
     return null;
   }
-  
+
   return result[0].encrypted_data;
 }
-

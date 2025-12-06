@@ -1,7 +1,7 @@
-import { View, StyleSheet, Button } from 'react-native';
-import { useAudioPlayer } from 'expo-audio';
+import { View, StyleSheet, Button } from "react-native";
+import { useAudioPlayer } from "expo-audio";
 
-const audioSource = require('../assets/audio/audio.mp3');
+const audioSource = require("../assets/audio/audio.mp3");
 
 export default function AudioPlayer() {
   const player = useAudioPlayer(audioSource);
@@ -22,8 +22,8 @@ export default function AudioPlayer() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
+    justifyContent: "center",
+    backgroundColor: "#ecf0f1",
     padding: 10,
   },
 });

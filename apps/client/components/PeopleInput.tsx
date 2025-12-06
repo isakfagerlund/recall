@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   Button,
   CircularProgress,
@@ -7,8 +7,8 @@ import {
   TextField,
   TextFieldRef,
   VStack,
-} from '@expo/ui/swift-ui';
-import { glassEffect, padding } from '@expo/ui/swift-ui/modifiers';
+} from "@expo/ui/swift-ui";
+import { glassEffect, padding } from "@expo/ui/swift-ui/modifiers";
 
 interface PeopleInputProps {
   value: string;
@@ -42,20 +42,20 @@ export function PeopleInput({
 
   const handleSubmit = async () => {
     await onSubmit();
-    onChangeText('');
-    fieldRef.current?.setText('');
+    onChangeText("");
+    fieldRef.current?.setText("");
   };
 
   return (
-    <Host matchContents style={{ width: '100%' }}>
+    <Host matchContents style={{ width: "100%" }}>
       <HStack spacing={12}>
         <VStack
           modifiers={[
             glassEffect({
-              shape: 'capsule',
+              shape: "capsule",
               glass: {
                 interactive: true,
-                variant: 'clear',
+                variant: "clear",
               },
             }),
           ]}
@@ -68,15 +68,15 @@ export function PeopleInput({
           />
         </VStack>
         <Button
-          systemImage={isRecording || isTranscribing ? undefined : 'mic.fill'}
-          variant={isRecording ? 'glassProminent' : 'glass'}
+          systemImage={isRecording || isTranscribing ? undefined : "mic.fill"}
+          variant={isRecording ? "glassProminent" : "glass"}
           onPress={onVoiceRecording}
           disabled={isTranscribing || isLoading || hasValue}
         >
           {(isRecording || isTranscribing) && <CircularProgress color="#fff" />}
         </Button>
         <Button
-          systemImage={isLoading ? undefined : 'arrow.up.message.fill'}
+          systemImage={isLoading ? undefined : "arrow.up.message.fill"}
           variant="glassProminent"
           onPress={handleSubmit}
           disabled={isRecording || isTranscribing}

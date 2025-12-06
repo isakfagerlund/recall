@@ -4,22 +4,22 @@ import {
   TextInput,
   Pressable,
   ActivityIndicator,
-} from 'react-native';
-import { apple } from '@react-native-ai/apple';
-import { generateObject } from 'ai';
-import { useState } from 'react';
-import { createStyles } from '@/theme/styles';
-import { personSchema, type Person } from '@/types/person';
+} from "react-native";
+import { apple } from "@react-native-ai/apple";
+import { generateObject } from "ai";
+import { useState } from "react";
+import { createStyles } from "@/theme/styles";
+import { personSchema, type Person } from "@/types/person";
 
 export default function PersonForm() {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [generatedPerson, setGeneratedPerson] = useState<Person | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handlePersonSubmit = async (): Promise<void> => {
     if (!input.trim()) {
-      setError('Please enter a person description');
+      setError("Please enter a person description");
       return;
     }
 
@@ -41,13 +41,13 @@ export default function PersonForm() {
 
       const person: Person = result.object;
       setGeneratedPerson(person);
-      setInput('');
-      console.log('Generated person:', person);
+      setInput("");
+      console.log("Generated person:", person);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Failed to generate person data';
+        err instanceof Error ? err.message : "Failed to generate person data";
       setError(message);
-      console.error('Error generating person:', err);
+      console.error("Error generating person:", err);
     } finally {
       setLoading(false);
     }
@@ -57,16 +57,16 @@ export default function PersonForm() {
     <View>
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: "row",
           gap: 12,
-          alignItems: 'center',
-          width: '100%',
+          alignItems: "center",
+          width: "100%",
         }}
       >
         <TextInput
           style={{
             borderWidth: 1,
-            borderColor: '#e5e7eb',
+            borderColor: "#e5e7eb",
             borderRadius: 8,
             padding: 12,
             fontSize: 16,
@@ -88,8 +88,8 @@ export default function PersonForm() {
               borderRadius: 50,
               width: 50,
               height: 50,
-              alignItems: 'center',
-              justifyContent: 'center',
+              alignItems: "center",
+              justifyContent: "center",
               padding: 0,
             },
           ]}
@@ -104,12 +104,12 @@ export default function PersonForm() {
         </Pressable>
       </View>
 
-      {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
+      {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
 
       {generatedPerson && (
         <View style={{ marginTop: 20 }}>
           <Text>Name: {generatedPerson.name}</Text>
-          <Text>Interests: {generatedPerson.interests.join(', ')}</Text>
+          <Text>Interests: {generatedPerson.interests.join(", ")}</Text>
           <Text>Extras: {generatedPerson.extras}</Text>
         </View>
       )}
