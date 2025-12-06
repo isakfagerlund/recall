@@ -13,7 +13,13 @@ export function RecentPeople({ people }: RecentPeopleProps) {
   };
 
   return (
-    <View style={{ backgroundColor: "#D9D9D9", gap: 10, width: "100%" }}>
+    <View
+      style={{
+        backgroundColor: "#D9D9D9",
+        gap: 10,
+        width: "100%",
+      }}
+    >
       <LegendList
         data={people}
         renderItem={renderItem}

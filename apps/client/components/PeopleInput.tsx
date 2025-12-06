@@ -76,7 +76,7 @@ export function PeopleInput({
           {(isRecording || isTranscribing) && <CircularProgress color="#fff" />}
         </Button>
         <Button
-          systemImage={isLoading ? undefined : "arrow.up.message.fill"}
+          systemImage={isLoading ? undefined : "arrow.up"}
           variant="glassProminent"
           onPress={handleSubmit}
           disabled={isRecording || isTranscribing}
