@@ -13,6 +13,7 @@ export async function getAllPeopleForSync(): Promise<Person[]> {
     id: row.id,
     name: row.name,
     description: row.description ?? "",
+    input: row.input,
     createdAt:
       row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
     updatedAt:
@@ -59,6 +60,7 @@ export async function upsertPeopleFromSync(people: Person[]): Promise<void> {
           .set({
             name: person.name,
             description: person.description || null,
+            input: person.input,
             updatedAt: incomingUpdatedAt,
             deletedAt: person.deletedAt ?? null,
           })
@@ -70,6 +72,7 @@ export async function upsertPeopleFromSync(people: Person[]): Promise<void> {
         id: person.id,
         name: person.name,
         description: person.description || null,
+        input: person.input,
         createdAt: person.createdAt,
         updatedAt: person.updatedAt ?? null,
         deletedAt: person.deletedAt ?? null,

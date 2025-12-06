@@ -1,26 +1,26 @@
-import { Hono } from 'hono';
-import type { Env } from '../../types/env';
-import { storeSyncData } from '../../lib/db';
-import { verifyHmacSignature } from '../../lib/auth';
+import { Hono } from "hono";
+import type { Env } from "../../types/env";
+import { storeSyncData } from "../../lib/db";
+import { verifyHmacSignature } from "../../lib/auth";
 
 const push = new Hono<{ Bindings: Env }>();
 
-push.post('/', async (c) => {
+push.post("/", async (c) => {
   try {
     const body = await c.req.json();
     const { syncKey, data, signature } = body;
 
     if (!syncKey || !data || !signature) {
       return c.json(
-        { error: 'Missing required fields: syncKey, data, signature' },
-        400
+        { error: "Missing required fields: syncKey, data, signature" },
+        400,
       );
     }
 
     // Verify HMAC signature
     const isValid = verifyHmacSignature(data, syncKey, signature);
     if (!isValid) {
-      return c.json({ error: 'Invalid signature' }, 401);
+      return c.json({ error: "Invalid signature" }, 401);
     }
 
     // Store the encrypted data (for now, data is sent as-is, not encrypted)
@@ -28,9 +28,9 @@ push.post('/', async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error in push sync:', error);
+    console.error("Error in push sync:", error);
     const message =
-      error instanceof Error ? error.message : 'Internal server error';
+      error instanceof Error ? error.message : "Internal server error";
     return c.json({ error: message }, 500);
   }
 });

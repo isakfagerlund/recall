@@ -9,6 +9,7 @@ export const personSchema = z.object({
   id: z.uuidv4(),
   name: z.string(),
   description: z.string(),
+  input: z.string(),
   createdAt: z.date(),
   updatedAt: z.date().optional(),
   deletedAt: z.date().optional(),

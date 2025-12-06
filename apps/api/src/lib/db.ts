@@ -1,11 +1,11 @@
-import { neon } from '@neondatabase/serverless';
+import { neon } from "@neondatabase/serverless";
 
 /**
  * Get a database client instance
  */
 function getDbClient(databaseUrl: string | undefined) {
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is not configured');
+    throw new Error("DATABASE_URL is not configured");
   }
   return neon(databaseUrl);
 }
@@ -14,7 +14,7 @@ function getDbClient(databaseUrl: string | undefined) {
  * Initialize the sync_data table if it doesn't exist
  */
 async function initializeDatabase(
-  databaseUrl: string | undefined
+  databaseUrl: string | undefined,
 ): Promise<void> {
   const sql = getDbClient(databaseUrl);
   await sql`
@@ -32,7 +32,7 @@ async function initializeDatabase(
 export async function storeSyncData(
   syncKey: string,
   encryptedData: string,
-  databaseUrl?: string
+  databaseUrl?: string,
 ): Promise<void> {
   await initializeDatabase(databaseUrl);
   const sql = getDbClient(databaseUrl);
@@ -52,7 +52,7 @@ export async function storeSyncData(
  */
 export async function getSyncData(
   syncKey: string,
-  databaseUrl?: string
+  databaseUrl?: string,
 ): Promise<string | null> {
   await initializeDatabase(databaseUrl);
   const sql = getDbClient(databaseUrl);

@@ -51,6 +51,7 @@ export default function TabOneScreen() {
       id: row.id,
       name: row.name,
       description: row.description ?? "",
+      input: row.input,
       createdAt:
         row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
       updatedAt:
@@ -100,6 +101,7 @@ export default function TabOneScreen() {
         id: personId,
         name: result.object.name,
         description: result.object.description || null,
+        input: value.trim(),
         createdAt: now,
         updatedAt: null,
       });

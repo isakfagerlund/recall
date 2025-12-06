@@ -1,5 +1,5 @@
-import { createHash } from 'crypto';
-import type { Env } from '../types/env';
+import { createHash } from "crypto";
+import type { Env } from "../types/env";
 
 /**
  * Verify HMAC signature for authentication
@@ -8,13 +8,13 @@ import type { Env } from '../types/env';
 export function verifyHmacSignature(
   data: string,
   key: string,
-  signature: string
+  signature: string,
 ): boolean {
   // Match the client-side implementation: hash(data + ":" + key)
   const combined = `${data}:${key}`;
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(combined);
-  const expectedSignature = hash.digest('base64');
+  const expectedSignature = hash.digest("base64");
   return expectedSignature === signature;
 }
 
@@ -24,13 +24,12 @@ export function verifyHmacSignature(
 export function validateApiKey(
   apiKey: string,
   salt: string,
-  storedHash: string
+  storedHash: string,
 ): boolean {
   // Hash the provided API key with the salt
   const combined = `${apiKey}${salt}`;
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(combined);
-  const computedHash = hash.digest('hex');
+  const computedHash = hash.digest("hex");
   return computedHash === storedHash;
 }
-

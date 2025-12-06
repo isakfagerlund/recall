@@ -4,4 +4,3 @@ export type Env = {
   API_KEY_SALT: string;
   API_KEY_HASH: string;
 };
-
