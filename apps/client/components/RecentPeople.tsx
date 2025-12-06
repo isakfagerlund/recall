@@ -15,4 +15,3 @@ export function RecentPeople({ people }: RecentPeopleProps) {
     </View>
   );
 }
-

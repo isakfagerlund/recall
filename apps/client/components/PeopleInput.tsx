@@ -31,6 +31,8 @@ export function PeopleInput({
 }: PeopleInputProps) {
   const fieldRef = useRef<TextFieldRef>(null);
 
+  const hasValue = value.length > 0;
+
   // Sync TextField when value changes externally (e.g., from voice transcription)
   useEffect(() => {
     if (fieldRef.current) {
@@ -69,12 +71,12 @@ export function PeopleInput({
           systemImage={isRecording || isTranscribing ? undefined : 'mic.fill'}
           variant={isRecording ? 'glassProminent' : 'glass'}
           onPress={onVoiceRecording}
-          disabled={isTranscribing || isLoading}
+          disabled={isTranscribing || isLoading || hasValue}
         >
           {(isRecording || isTranscribing) && <CircularProgress color="#fff" />}
         </Button>
         <Button
-          systemImage={isLoading ? undefined : 'checkmark'}
+          systemImage={isLoading ? undefined : 'arrow.up.message.fill'}
           variant="glassProminent"
           onPress={handleSubmit}
           disabled={isRecording || isTranscribing}

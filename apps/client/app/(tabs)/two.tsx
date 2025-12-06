@@ -1,41 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  Alert,
   ActivityIndicator,
+  Alert,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   Pressable,
   View,
+  Animated,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
+import { useFocusEffect, router } from 'expo-router';
 
 import { db } from '@/db';
 import { people as peopleTable } from '@/db/schema';
 import { desc } from 'drizzle-orm';
-import {
-  clearSyncKey,
-  getSyncKey,
-  setSyncKey,
-} from '@/lib/sync/key';
+import { getSyncKey } from '@/lib/sync/key';
 import { performSync } from '@/lib/sync/sync';
-import { markAllAsUnsynced } from '@/db/sync';
 
 export default function SettingsScreen() {
   const [syncKey, setSyncKeyState] = useState<string | null>(null);
-  const [pastedKey, setPastedKey] = useState('');
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
-  useEffect(() => {
-    loadSyncKey();
-    loadLastSync();
-  }, []);
-
-  const loadSyncKey = async () => {
+  const loadSyncKey = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -47,9 +40,9 @@ export default function SettingsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const loadLastSync = async () => {
+  const loadLastSync = useCallback(async () => {
     try {
       const result = await db
         .select()
@@ -59,8 +52,7 @@ export default function SettingsScreen() {
 
       if (result.length > 0 && result[0].syncedAt) {
         const value = result[0].syncedAt;
-        const date =
-          value instanceof Date ? value : new Date(value);
+        const date = value instanceof Date ? value : new Date(value);
         if (!isNaN(date.getTime())) {
           setLastSync(date);
         }
@@ -68,70 +60,43 @@ export default function SettingsScreen() {
     } catch (err) {
       console.error('Error loading last sync:', err);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSyncKey();
+      loadLastSync();
+    }, [loadSyncKey, loadLastSync])
+  );
 
   const handleCopyKey = async () => {
-    if (!syncKey) return;
-    await Clipboard.setStringAsync(syncKey);
-    Alert.alert('Copied', 'Sync key copied to clipboard');
-  };
+    if (!syncKey || isLoading) return;
 
-  const handlePasteFromClipboard = async () => {
-    const value = await Clipboard.getStringAsync();
-    setPastedKey(value.trim());
-  };
-
-  const applyPastedKey = async () => {
-    if (!pastedKey.trim()) {
-      setError('Please enter a sync key to apply');
-      return;
-    }
     try {
-      await setSyncKey(pastedKey.trim());
-      setSyncKeyState(pastedKey.trim());
-      await markAllAsUnsynced();
-      setLastSync(null);
-      setError(null);
-      Alert.alert('Sync key updated', 'New key applied. Please sync now.');
-    } catch (err) {
-      console.error('Error applying key', err);
-      const message =
-        err instanceof Error ? err.message : 'Failed to apply key';
-      setError(message);
-      Alert.alert('Error', message);
-    }
-  };
+      await Clipboard.setStringAsync(syncKey);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-  const regenerateKey = () => {
-    Alert.alert(
-      'Regenerate key',
-      'This will replace your current key. The old key will no longer sync. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Regenerate',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await clearSyncKey();
-              const newKey = await getSyncKey();
-              setSyncKeyState(newKey);
-              setPastedKey('');
-              await markAllAsUnsynced();
-              setLastSync(null);
-              setError(null);
-              Alert.alert('Key regenerated', 'New key created. Please sync.');
-            } catch (err) {
-              console.error('Error regenerating key', err);
-              const message =
-                err instanceof Error ? err.message : 'Failed to regenerate key';
-              setError(message);
-              Alert.alert('Error', message);
-            }
-          },
-        },
-      ]
-    );
+      setCopied(true);
+      fadeAnim.setValue(0);
+
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.delay(1500),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setCopied(false);
+      });
+    } catch (err) {
+      console.error('Error copying key', err);
+    }
   };
 
   const handleSync = async () => {
@@ -158,13 +123,15 @@ export default function SettingsScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: '#D9D9D9' }}
-      contentContainerStyle={{ padding: 20, gap: 16 }}
+      contentContainerStyle={{ paddingHorizontal: 14, gap: 16 }}
     >
       <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Settings</Text>
 
       <View style={{ gap: 8 }}>
         <Text style={{ fontSize: 16, fontWeight: '600' }}>Sync Key</Text>
-        <View
+        <Pressable
+          onPress={handleCopyKey}
+          disabled={isLoading || !syncKey}
           style={{
             backgroundColor: '#f0f0f0',
             padding: 12,
@@ -173,93 +140,74 @@ export default function SettingsScreen() {
             borderColor: '#ddd',
             minHeight: 50,
             justifyContent: 'center',
+            opacity: isLoading || !syncKey ? 0.6 : 1,
           }}
         >
           {isLoading ? (
             <ActivityIndicator />
           ) : (
-            <Text
-              style={{ fontSize: 12, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }}
-              selectable
-              numberOfLines={2}
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
             >
-              {syncKey ?? 'Not available'}
-            </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+                  flex: 1,
+                }}
+                numberOfLines={2}
+              >
+                {syncKey ?? 'Not available'}
+              </Text>
+              {copied && (
+                <Animated.View
+                  style={{
+                    opacity: fadeAnim,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: '#34C759',
+                      fontWeight: '600',
+                    }}
+                  >
+                    ✓
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: '#34C759',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Copied
+                  </Text>
+                </Animated.View>
+              )}
+            </View>
           )}
-        </View>
+        </Pressable>
         <Text style={{ fontSize: 12, color: '#666' }}>
-          Copy, paste, or regenerate your sync key.
+          Tap the sync key to copy it.
         </Text>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Pressable
-            onPress={handleCopyKey}
-            style={{
-              backgroundColor: '#007AFF',
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 8,
-            }}
-            disabled={!syncKey}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Copy</Text>
-          </Pressable>
-          <Pressable
-            onPress={regenerateKey}
-            style={{
-              backgroundColor: '#ff3b30',
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Regenerate</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 16, fontWeight: '600' }}>Paste / Apply Key</Text>
-        <TextInput
-          value={pastedKey}
-          onChangeText={setPastedKey}
-          placeholder="Paste a sync key"
+        <Pressable
+          onPress={() => router.push('/change-sync-key')}
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: '#007AFF',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
             borderRadius: 8,
-            borderWidth: 1,
-            borderColor: '#ccc',
-            paddingHorizontal: 12,
-            paddingVertical: 10,
+            alignItems: 'center',
           }}
-          multiline
-        />
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Pressable
-            onPress={handlePasteFromClipboard}
-            style={{
-              backgroundColor: '#666',
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Paste from clipboard</Text>
-          </Pressable>
-          <Pressable
-            onPress={applyPastedKey}
-            style={{
-              backgroundColor: '#007AFF',
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-              borderRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Apply key</Text>
-          </Pressable>
-        </View>
-        <Text style={{ fontSize: 12, color: '#666' }}>
-          Applying a key replaces the current one. Old keys will no longer sync.
-        </Text>
+        >
+          <Text style={{ color: '#fff', fontWeight: '600' }}>
+            Change sync key
+          </Text>
+        </Pressable>
       </View>
 
       {lastSync && (
@@ -286,7 +234,8 @@ export default function SettingsScreen() {
         onPress={handleSync}
         disabled={isSyncing || isLoading || !syncKey}
         style={{
-          backgroundColor: isSyncing || isLoading || !syncKey ? '#ccc' : '#007AFF',
+          backgroundColor:
+            isSyncing || isLoading || !syncKey ? '#ccc' : '#007AFF',
           paddingVertical: 16,
           borderRadius: 10,
           alignItems: 'center',

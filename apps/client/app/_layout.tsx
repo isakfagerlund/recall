@@ -65,6 +65,13 @@ function RootLayoutNav() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen
+            name="change-sync-key"
+            options={{
+              presentation: 'modal',
+              title: 'Change Sync Key',
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </KeyboardProvider>

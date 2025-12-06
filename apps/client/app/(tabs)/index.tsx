@@ -24,6 +24,7 @@ export default function TabOneScreen() {
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [keyboardOpen, setKeyobardOpen] = useState(false);
   const {
     isRecording,
     isTranscribing,
@@ -142,6 +143,25 @@ export default function TabOneScreen() {
     }
   };
 
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, () =>
+      setKeyobardOpen(true)
+    );
+    const hideSub = Keyboard.addListener(hideEvent, () =>
+      setKeyobardOpen(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   // Sync voice errors to main error state
   useEffect(() => {
     if (voiceError) {
@@ -152,7 +172,7 @@ export default function TabOneScreen() {
   return (
     <>
       <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: '#D9D9D9' }}
+        style={{ flex: 1, backgroundColor: '#D9D9D9', paddingHorizontal: 14 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
@@ -163,12 +183,14 @@ export default function TabOneScreen() {
             justifyContent: 'space-between',
             backgroundColor: '#D9D9D9',
             paddingTop: 72,
-            paddingBottom: 124,
-            paddingHorizontal: 18,
+            paddingBottom: keyboardOpen ? 72 : 124,
             gap: 18,
           }}
         >
-          <ScrollView keyboardShouldPersistTaps="handled">
+          <ScrollView
+            style={{ width: '100%' }}
+            keyboardShouldPersistTaps="handled"
+          >
             {people.length > 0 && <RecentPeople people={people} />}
           </ScrollView>
           {error ? (
