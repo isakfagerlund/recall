@@ -5,7 +5,7 @@
 [x] Setup sqlite and persist data https://orm.drizzle.team/docs/connect-expo-sqlite
 [x] Save person in the database with date
 [x] Move backend part to a simple Hono API and host it on cloudflare
-[] Ask for Calendar access to match date added with calendar event
+[x] Ask for Calendar access to match date added with calendar event
 [] Create a recent added list of contacts on the top of the home screen. I'm thinking a rolling list of 3 items
 [] Design a nice contacts page
 [] Click a contact and connect with a number

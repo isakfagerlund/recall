@@ -27,6 +27,7 @@ import {
   Text,
 } from 'react-native';
 import { useVoiceToText } from '@/components/useVoiceToText';
+import { useCalendarEvents } from '@/components/useCalendarEvents';
 import { KeyboardToolbar } from 'react-native-keyboard-controller';
 import Animated, {
   useSharedValue,
@@ -38,6 +39,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { db } from '@/db';
 import { people as peopleTable, PersonRow } from '@/db/schema';
 import { desc, eq, isNull } from 'drizzle-orm';
+import { getCalendarContext } from '@/utils/calendarMatch';
 
 export default function TabOneScreen() {
   const fieldRef = useRef<TextFieldRef>(null);
@@ -272,12 +274,25 @@ const RecentPeople = ({ people }: { people: Person[] }) => {
 const PersonCard = ({ person }: { person: Person }) => {
   const scale = useSharedValue(1);
   const backgroundColor = useThemeColor({}, 'background');
+  const { getEventsForTime, hasPermission } = useCalendarEvents();
+  const [calendarContext, setCalendarContext] = useState<string | null>(null);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
     };
   });
+
+  // Fetch calendar context when component mounts
+  useEffect(() => {
+    if (hasPermission !== false) {
+      getCalendarContext(person.createdAt, getEventsForTime)
+        .then(setCalendarContext)
+        .catch((err) => {
+          console.error('Error fetching calendar context:', err);
+        });
+    }
+  }, [person.createdAt, getEventsForTime, hasPermission]);
 
   const handleLongPress = () => {
     if (Platform.OS === 'ios') {
@@ -340,7 +355,12 @@ const PersonCard = ({ person }: { person: Person }) => {
         ]}
       >
         <Text style={{ fontWeight: 'bold' }}>{person.name}</Text>
-        <Text>{person.description}</Text>
+        {person.description ? <Text>{person.description}</Text> : null}
+        {calendarContext ? (
+          <Text style={{ fontSize: 12, fontStyle: 'italic', color: '#666' }}>
+            {calendarContext}
+          </Text>
+        ) : null}
         <Text style={{ fontSize: 12 }}>
           {format(person.createdAt, 'MMM do pp')}
         </Text>

@@ -226,6 +226,8 @@ PODS:
     - ExpoModulesCore
   - ExpoAudio (1.0.14):
     - ExpoModulesCore
+  - ExpoCalendar (15.0.7):
+    - ExpoModulesCore
   - ExpoClipboard (8.0.7):
     - ExpoModulesCore
   - ExpoContacts (15.0.10):
@@ -2237,6 +2239,7 @@ DEPENDENCIES:
   - "expo-dev-menu-interface (from `../../../node_modules/.bun/expo-dev-menu-interface@2.0.0+4cdc5b9f0b1e1460/node_modules/expo-dev-menu-interface/ios`)"
   - "ExpoAsset (from `../../../node_modules/.bun/expo-asset@12.0.9+05619bbd9fdce70a/node_modules/expo-asset/ios`)"
   - "ExpoAudio (from `../../../node_modules/.bun/expo-audio@1.0.14+1fc08dcb70c2ef15/node_modules/expo-audio/ios`)"
+  - "ExpoCalendar (from `../../../node_modules/.bun/expo-calendar@15.0.7+4cdc5b9f0b1e1460/node_modules/expo-calendar/ios`)"
   - "ExpoClipboard (from `../../../node_modules/.bun/expo-clipboard@8.0.7+4cdc5b9f0b1e1460/node_modules/expo-clipboard/ios`)"
   - "ExpoContacts (from `../../../node_modules/.bun/expo-contacts@15.0.10+4cdc5b9f0b1e1460/node_modules/expo-contacts/ios`)"
   - "ExpoCrypto (from `../../../node_modules/.bun/expo-crypto@15.0.7+4cdc5b9f0b1e1460/node_modules/expo-crypto/ios`)"
@@ -2352,6 +2355,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/.bun/expo-asset@12.0.9+05619bbd9fdce70a/node_modules/expo-asset/ios"
   ExpoAudio:
     :path: "../../../node_modules/.bun/expo-audio@1.0.14+1fc08dcb70c2ef15/node_modules/expo-audio/ios"
+  ExpoCalendar:
+    :path: "../../../node_modules/.bun/expo-calendar@15.0.7+4cdc5b9f0b1e1460/node_modules/expo-calendar/ios"
   ExpoClipboard:
     :path: "../../../node_modules/.bun/expo-clipboard@8.0.7+4cdc5b9f0b1e1460/node_modules/expo-clipboard/ios"
   ExpoContacts:
@@ -2546,6 +2551,7 @@ SPEC CHECKSUMS:
   expo-dev-menu-interface: 600df12ea01efecdd822daaf13cc0ac091775533
   ExpoAsset: 9ba6fbd677fb8e241a3899ac00fa735bc911eadf
   ExpoAudio: 6a923f661e3360a183503fd96728ff9010ae8afd
+  ExpoCalendar: 34fe3956dab6278057a8ad04c648fe43bd642ef5
   ExpoClipboard: af650d14765f19c60ce2a1eaf9dfe6445eff7365
   ExpoContacts: e3e99e2a1740395cb0c48b8d11e15d6ae10f671b
   ExpoCrypto: c1fbce112d1b6b79652bbe380b4fd4cc91676595
