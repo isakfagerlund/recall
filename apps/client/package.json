@@ -5,8 +5,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
-    "ios": "expo run:ios",
-    "ios-device": "npx expo run:ios --device",
+    "ios": "expo prebuild --platform ios && expo run:ios",
+    "ios-device": "expo prebuild --platform ios && npx expo run:ios --device",
     "ios-device-release": "npx expo run:ios --device --configuration Release",
     "web": "expo start --web",
     "dev": "expo start",

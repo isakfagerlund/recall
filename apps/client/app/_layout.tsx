@@ -72,6 +72,13 @@ function RootLayoutNav() {
               title: "Change Sync Key",
             }}
           />
+          <Stack.Screen
+            name="person-edit"
+            options={{
+              presentation: "modal",
+              title: "Edit Person",
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </KeyboardProvider>

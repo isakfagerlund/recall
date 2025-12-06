@@ -207,6 +207,7 @@ export default function TabOneScreen() {
               <Text style={{ color: "#fff", fontSize: 14 }}>{error}</Text>
             </View>
           ) : null}
+
           <PeopleInput
             value={value}
             onChangeText={setValue}

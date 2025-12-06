@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import { router } from "expo-router";
 import { useCalendarEvents } from "./useCalendarEvents";
 import { getCalendarContext } from "@/utils/calendarMatch";
 import { db } from "@/db";
@@ -100,8 +101,16 @@ export function PersonCard({ person }: PersonCardProps) {
     scale.value = withTiming(1, { duration: 400 });
   };
 
+  const handlePress = () => {
+    router.push({
+      pathname: "/person-edit",
+      params: { id: person.id },
+    });
+  };
+
   return (
     <Pressable
+      onPress={handlePress}
       onLongPress={handleLongPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -131,12 +140,13 @@ export function PersonCard({ person }: PersonCardProps) {
               fontSize: 12,
               fontStyle: "italic",
               color: textColor,
+              opacity: 0.7,
             }}
           >
             {calendarContext}
           </Text>
         ) : null}
-        <Text style={{ fontSize: 12, color: textColor }}>
+        <Text style={{ fontSize: 12, color: textColor, opacity: 0.4 }}>
           {format(person.createdAt, "MMM do pp")}
         </Text>
       </Animated.View>

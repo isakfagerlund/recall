@@ -16,7 +16,6 @@ export function RecentPeople({ people }: RecentPeopleProps) {
     <View
       style={{
         backgroundColor: "#D9D9D9",
-        gap: 10,
         width: "100%",
       }}
     >
