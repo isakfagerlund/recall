@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +18,7 @@ import { people as peopleTable } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { getSyncKey } from "@/lib/sync/key";
 import { performSync } from "@/lib/sync/sync";
+import { useCalendarEvents } from "@/components/useCalendarEvents";
 
 export default function SettingsScreen() {
   const [syncKey, setSyncKeyState] = useState<string | null>(null);
@@ -27,6 +28,21 @@ export default function SettingsScreen() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [copied, setCopied] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
+  const [calendarError, setCalendarError] = useState<string | null>(null);
+  const [isSavingCalendars, setIsSavingCalendars] = useState(false);
+  const [pendingSelectedCalendars, setPendingSelectedCalendars] = useState<
+    string[]
+  >([]);
+
+  const {
+    hasPermission: calendarPermission,
+    requestPermission: requestCalendarPermission,
+    refreshCalendars,
+    calendars,
+    isLoadingCalendars,
+    selectedCalendarIds,
+    updateSelectedCalendarIds,
+  } = useCalendarEvents();
 
   const loadSyncKey = useCallback(async () => {
     setIsLoading(true);
@@ -66,8 +82,13 @@ export default function SettingsScreen() {
     useCallback(() => {
       loadSyncKey();
       loadLastSync();
-    }, [loadSyncKey, loadLastSync]),
+      refreshCalendars();
+    }, [loadSyncKey, loadLastSync, refreshCalendars]),
   );
+
+  useEffect(() => {
+    setPendingSelectedCalendars(selectedCalendarIds);
+  }, [selectedCalendarIds]);
 
   const handleCopyKey = async () => {
     if (!syncKey || isLoading) return;
@@ -117,6 +138,49 @@ export default function SettingsScreen() {
       Alert.alert("Sync Failed", message);
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handleRequestCalendarPermission = async () => {
+    setCalendarError(null);
+    const granted = await requestCalendarPermission();
+    if (!granted) {
+      setCalendarError(
+        "Calendar permission is required to choose which calendars to use.",
+      );
+      return;
+    }
+    await refreshCalendars();
+  };
+
+  const handleToggleCalendar = (calendarId: string) => {
+    setPendingSelectedCalendars((prev) => {
+      const exists = prev.includes(calendarId);
+      return exists ? prev.filter((id) => id !== calendarId) : [...prev, calendarId];
+    });
+  };
+
+  const handleUseAllCalendars = () => {
+    setPendingSelectedCalendars([]);
+  };
+
+  const handleSaveCalendars = async () => {
+    setIsSavingCalendars(true);
+    setCalendarError(null);
+    try {
+      await updateSelectedCalendarIds(pendingSelectedCalendars);
+      const description =
+        pendingSelectedCalendars.length > 0
+          ? "Only selected calendars will be used for event context."
+          : "All calendars will be used for event context.";
+      Alert.alert("Calendar preference saved", description);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to save calendar choice";
+      setCalendarError(message);
+      Alert.alert("Calendar selection", message);
+    } finally {
+      setIsSavingCalendars(false);
     }
   };
 
@@ -215,6 +279,161 @@ export default function SettingsScreen() {
           Last synced: {lastSync.toLocaleString()}
         </Text>
       )}
+
+      <View style={{ gap: 8 }}>
+        <Text style={{ fontSize: 16, fontWeight: "600" }}>Calendars</Text>
+        <Text style={{ fontSize: 12, color: "#666" }}>
+          Choose which calendars should be used when fetching event context.
+        </Text>
+        {calendarPermission ? (
+          <View style={{ gap: 8 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <Pressable
+                onPress={refreshCalendars}
+                style={{
+                  backgroundColor: "#f0f0f0",
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "#ddd",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <Text style={{ fontWeight: "600" }}>Refresh calendars</Text>
+              </Pressable>
+              {isLoadingCalendars ? <ActivityIndicator /> : null}
+            </View>
+
+            {isLoadingCalendars ? (
+              <ActivityIndicator />
+            ) : calendars.length === 0 ? (
+              <Text style={{ fontSize: 12, color: "#666" }}>
+                No calendars found. Pull to refresh or check permissions.
+              </Text>
+            ) : (
+              <View style={{ gap: 6 }}>
+                <Pressable
+                  onPress={handleUseAllCalendars}
+                  style={{
+                    backgroundColor: "#f0f0f0",
+                    padding: 12,
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: "#ddd",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ fontWeight: "600" }}>Use all calendars</Text>
+                    <Text style={{ fontSize: 12, color: "#666" }}>
+                      Default option if nothing is selected.
+                    </Text>
+                  </View>
+                  {pendingSelectedCalendars.length === 0 ? (
+                    <Text style={{ fontSize: 16, color: "#34C759" }}>✓</Text>
+                  ) : null}
+                </Pressable>
+
+                {calendars.map((calendar) => {
+                  const isSelected = pendingSelectedCalendars.includes(calendar.id);
+                  return (
+                    <Pressable
+                      key={calendar.id}
+                      onPress={() => handleToggleCalendar(calendar.id)}
+                      style={{
+                        backgroundColor: "#f9f9f9",
+                        padding: 12,
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        borderColor: isSelected ? "#007AFF" : "#ddd",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <View>
+                        <Text style={{ fontWeight: "600" }}>
+                          {calendar.title ?? "Untitled calendar"}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: "#666" }}>
+                          {calendar.source?.name ?? "Calendar"}
+                        </Text>
+                      </View>
+                      {isSelected ? (
+                        <Text style={{ fontSize: 16, color: "#007AFF" }}>✓</Text>
+                      ) : null}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+
+            <Pressable
+              onPress={handleSaveCalendars}
+              disabled={
+                isSavingCalendars || isLoadingCalendars || calendarPermission === null
+              }
+              style={{
+                backgroundColor:
+                  isSavingCalendars || isLoadingCalendars || calendarPermission === null
+                    ? "#ccc"
+                    : "#007AFF",
+                paddingVertical: 14,
+                borderRadius: 10,
+                alignItems: "center",
+              }}
+            >
+              {isSavingCalendars ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={{ color: "#fff", fontWeight: "700" }}>
+                  Save calendar choice
+                </Text>
+              )}
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable
+            onPress={handleRequestCalendarPermission}
+            style={{
+              backgroundColor: "#007AFF",
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "600" }}>
+              Enable calendar access
+            </Text>
+          </Pressable>
+        )}
+
+        {calendarError ? (
+          <View
+            style={{
+              backgroundColor: "#fee",
+              padding: 12,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: "#fcc",
+            }}
+          >
+            <Text style={{ color: "#c00", fontSize: 12 }}>{calendarError}</Text>
+          </View>
+        ) : null}
+      </View>
 
       {error && (
         <View
