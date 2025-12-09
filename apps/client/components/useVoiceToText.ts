@@ -8,7 +8,7 @@ import {
 } from "expo-audio";
 import { File } from "expo-file-system";
 import Constants from "expo-constants";
-import { Alert } from "react-native";
+import { Alert, Keyboard } from "react-native";
 import { experimental_transcribe } from "ai";
 import { apple } from "@react-native-ai/apple";
 
@@ -78,6 +78,7 @@ export function useVoiceToText(): UseVoiceToTextReturn {
   const startRecording = useCallback(async (): Promise<void> => {
     try {
       setError(null);
+      Keyboard.dismiss();
       const hasPermission = await requestPermissions();
       if (!hasPermission) {
         return;
