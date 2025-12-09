@@ -10,6 +10,7 @@ import {
   ScrollView,
   Text,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVoiceToText } from "@/components/useVoiceToText";
 import { KeyboardToolbar } from "react-native-keyboard-controller";
 import * as Crypto from "expo-crypto";
@@ -25,6 +26,7 @@ export default function TabOneScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [keyboardOpen, setKeyobardOpen] = useState(false);
+  const insets = useSafeAreaInsets();
   const {
     isRecording,
     isTranscribing,
@@ -176,7 +178,7 @@ export default function TabOneScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: "#D9D9D9", paddingHorizontal: 14 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
       >
         <View
           style={{
@@ -184,8 +186,8 @@ export default function TabOneScreen() {
             alignItems: "center",
             justifyContent: "space-between",
             backgroundColor: "#D9D9D9",
-            paddingTop: 72,
-            paddingBottom: keyboardOpen ? 72 : 124,
+            paddingTop: insets.top + 24,
+            paddingBottom: (keyboardOpen ? 72 : 124) + insets.bottom,
             gap: 18,
           }}
         >

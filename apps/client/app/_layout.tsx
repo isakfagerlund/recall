@@ -6,10 +6,13 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
+import * as SystemUI from "expo-system-ui";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useColorScheme } from "@/components/useColorScheme";
 import { initializeDatabase } from "@/db";
 
@@ -31,6 +34,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (error) throw error;
   }, [error]);
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync("transparent").catch((err) => {
+      console.error("Failed to set system UI background color:", err);
+    });
+  }, []);
 
   // Initialize database on app startup
   useEffect(() => {
@@ -60,27 +69,41 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <KeyboardProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-          <Stack.Screen
-            name="change-sync-key"
-            options={{
-              presentation: "modal",
-              title: "Change Sync Key",
-            }}
+    <SafeAreaProvider>
+      <KeyboardProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <StatusBar
+            translucent
+            backgroundColor="transparent"
+            style={colorScheme === "dark" ? "light" : "dark"}
           />
-          <Stack.Screen
-            name="person-edit"
-            options={{
-              presentation: "modal",
-              title: "Edit Person",
+          <Stack
+            screenOptions={{
+              statusBarStyle: colorScheme === "dark" ? "light" : "dark",
+              statusBarTranslucent: true,
+              statusBarBackgroundColor: "transparent",
+              contentStyle: { backgroundColor: "#D9D9D9" },
             }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </KeyboardProvider>
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+            <Stack.Screen
+              name="change-sync-key"
+              options={{
+                presentation: "modal",
+                title: "Change Sync Key",
+              }}
+            />
+            <Stack.Screen
+              name="person-edit"
+              options={{
+                presentation: "modal",
+                title: "Edit Person",
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </KeyboardProvider>
+    </SafeAreaProvider>
   );
 }
