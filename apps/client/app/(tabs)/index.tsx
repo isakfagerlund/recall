@@ -7,8 +7,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
+  TextInput,
 } from "react-native";
 import { useVoiceToText } from "@/components/useVoiceToText";
 import { KeyboardToolbar } from "react-native-keyboard-controller";
@@ -16,15 +16,19 @@ import * as Crypto from "expo-crypto";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/db";
 import { people as peopleTable, PersonRow } from "@/db/schema";
-import { desc, isNull } from "drizzle-orm";
+import { asc, desc, isNull } from "drizzle-orm";
 import { RecentPeople } from "@/components/RecentPeople";
 import { PeopleInput } from "@/components/PeopleInput";
+import { GlassView } from "expo-glass-effect";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabOneScreen() {
   const [value, setValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [keyboardOpen, setKeyobardOpen] = useState(false);
+  const insets = useSafeAreaInsets();
   const {
     isRecording,
     isTranscribing,
@@ -41,7 +45,7 @@ export default function TabOneScreen() {
       .select()
       .from(peopleTable)
       .where(isNull(peopleTable.deletedAt))
-      .orderBy(desc(peopleTable.createdAt)),
+      .orderBy(asc(peopleTable.createdAt)),
   );
 
   // Convert database rows to Person type
@@ -173,7 +177,6 @@ export default function TabOneScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: "#D9D9D9", paddingHorizontal: 14 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={0}
       >
         <View
           style={{
@@ -181,17 +184,36 @@ export default function TabOneScreen() {
             alignItems: "center",
             justifyContent: "space-between",
             backgroundColor: "#D9D9D9",
-            paddingTop: 72,
             paddingBottom: keyboardOpen ? 72 : 124,
             gap: 18,
+            position: "relative",
           }}
         >
-          <ScrollView
-            style={{ width: "100%" }}
-            keyboardShouldPersistTaps="handled"
-          >
-            {people.length > 0 && <RecentPeople people={people} />}
-          </ScrollView>
+          <LinearGradient
+            colors={["#D9D9D9", "rgba(217, 217, 217, 0)"]}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: insets.top + 40,
+              zIndex: 2,
+            }}
+            pointerEvents="none"
+          />
+          <RecentPeople people={people} />
+          <LinearGradient
+            colors={["rgba(217, 217, 217, 0)", "#D9D9D9"]}
+            style={{
+              position: "absolute",
+              bottom: 176,
+              left: 0,
+              right: 0,
+              height: insets.top,
+              zIndex: 3,
+            }}
+            pointerEvents="none"
+          />
           {error ? (
             <View
               style={{

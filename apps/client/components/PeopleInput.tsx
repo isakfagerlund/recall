@@ -35,9 +35,13 @@ export function PeopleInput({
 
   // Sync TextField when value changes externally (e.g., from voice transcription)
   useEffect(() => {
-    if (fieldRef.current) {
-      fieldRef.current.setText(value);
-    }
+    const handleText = async () => {
+      if (fieldRef.current) {
+        await fieldRef.current.setText(value);
+      }
+    };
+
+    handleText();
   }, [value]);
 
   const handleSubmit = async () => {
@@ -47,7 +51,7 @@ export function PeopleInput({
   };
 
   return (
-    <Host matchContents style={{ width: "100%" }}>
+    <Host matchContents style={{ width: "100%", zIndex: 3 }}>
       <HStack spacing={12}>
         <VStack
           modifiers={[
