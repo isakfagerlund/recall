@@ -1,5 +1,10 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as Calendar from "expo-calendar";
+
+import {
+  getSelectedCalendarIds,
+  setSelectedCalendarIds,
+} from "@/lib/calendar/preferences";
 
 interface UseCalendarEventsReturn {
   hasPermission: boolean | null;
@@ -8,6 +13,11 @@ interface UseCalendarEventsReturn {
     timestamp: Date,
     windowHours?: number,
   ) => Promise<Calendar.Event[]>;
+  calendars: Calendar.Calendar[];
+  isLoadingCalendars: boolean;
+  refreshCalendars: () => Promise<void>;
+  selectedCalendarIds: string[];
+  updateSelectedCalendarIds: (ids: string[]) => Promise<void>;
 }
 
 /**
@@ -15,10 +25,23 @@ interface UseCalendarEventsReturn {
  */
 export function useCalendarEvents(): UseCalendarEventsReturn {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [calendars, setCalendars] = useState<Calendar.Calendar[]>([]);
+  const [isLoadingCalendars, setIsLoadingCalendars] = useState(false);
+  const [selectedCalendarIds, setSelectedCalendarIdsState] = useState<
+    string[]
+  >([]);
+  const selectedCalendarIdsRef = useRef<string[]>([]);
 
-  // Check permission status on mount
-  useEffect(() => {
-    checkPermissionStatus();
+  const syncSelectedCalendars = useCallback(async (): Promise<string[]> => {
+    try {
+      const saved = await getSelectedCalendarIds();
+      setSelectedCalendarIdsState(saved);
+      selectedCalendarIdsRef.current = saved;
+      return saved;
+    } catch (err) {
+      console.error("Error syncing selected calendars:", err);
+      return [];
+    }
   }, []);
 
   const checkPermissionStatus = useCallback(async () => {
@@ -30,6 +53,12 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
       setHasPermission(false);
     }
   }, []);
+
+  // Check permission status on mount
+  useEffect(() => {
+    checkPermissionStatus();
+    syncSelectedCalendars();
+  }, [checkPermissionStatus, syncSelectedCalendars]);
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     try {
@@ -43,6 +72,45 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
       return false;
     }
   }, []);
+
+  const refreshCalendars = useCallback(async (): Promise<void> => {
+    setIsLoadingCalendars(true);
+    try {
+      const permission = hasPermission ?? (await requestPermission());
+      if (!permission) {
+        setCalendars([]);
+        return;
+      }
+
+      const allCalendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT,
+      );
+      setCalendars(allCalendars);
+    } catch (err) {
+      console.error("Error loading calendars:", err);
+      setCalendars([]);
+    } finally {
+      setIsLoadingCalendars(false);
+    }
+  }, [hasPermission, requestPermission]);
+
+  const updateSelectedCalendarIds = useCallback(
+    async (ids: string[]): Promise<void> => {
+      try {
+        setSelectedCalendarIdsState(ids);
+        selectedCalendarIdsRef.current = ids;
+        await setSelectedCalendarIds(ids);
+      } catch (err) {
+        console.error("Error updating selected calendars:", err);
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to save calendar selection";
+        throw new Error(message);
+      }
+    },
+    [],
+  );
 
   const getEventsForTime = useCallback(
     async (
@@ -63,11 +131,21 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
       }
 
       try {
+        // Refresh selection so we use the latest saved choice
+        const activeSelection = await syncSelectedCalendars();
+
         // Get all calendars
-        const calendars = await Calendar.getCalendarsAsync(
+        const availableCalendars = await Calendar.getCalendarsAsync(
           Calendar.EntityTypes.EVENT,
         );
-        const calendarIds = calendars.map((cal) => cal.id);
+        const filteredCalendars =
+          activeSelection.length > 0
+            ? availableCalendars.filter((cal) =>
+                activeSelection.includes(cal.id),
+              )
+            : availableCalendars;
+
+        const calendarIds = filteredCalendars.map((cal) => cal.id);
 
         if (calendarIds.length === 0) {
           return [];
@@ -93,12 +171,17 @@ export function useCalendarEvents(): UseCalendarEventsReturn {
         return [];
       }
     },
-    [hasPermission, requestPermission],
+    [hasPermission, requestPermission, syncSelectedCalendars],
   );
 
   return {
     hasPermission,
     requestPermission,
     getEventsForTime,
+    calendars,
+    isLoadingCalendars,
+    refreshCalendars,
+    selectedCalendarIds,
+    updateSelectedCalendarIds,
   };
 }

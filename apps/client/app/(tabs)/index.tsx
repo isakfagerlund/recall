@@ -19,9 +19,10 @@ import { people as peopleTable, PersonRow } from "@/db/schema";
 import { asc, desc, isNull } from "drizzle-orm";
 import { RecentPeople } from "@/components/RecentPeople";
 import { PeopleInput } from "@/components/PeopleInput";
-import { GlassView } from "expo-glass-effect";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const paddingBottomNoKeyboard = 104;
 
 export default function TabOneScreen() {
   const [value, setValue] = useState("");
@@ -184,7 +185,7 @@ export default function TabOneScreen() {
             alignItems: "center",
             justifyContent: "space-between",
             backgroundColor: "#D9D9D9",
-            paddingBottom: keyboardOpen ? 72 : 124,
+            paddingBottom: keyboardOpen ? 72 : paddingBottomNoKeyboard,
             gap: 18,
             position: "relative",
           }}
@@ -206,7 +207,7 @@ export default function TabOneScreen() {
             colors={["rgba(217, 217, 217, 0)", "#D9D9D9"]}
             style={{
               position: "absolute",
-              bottom: 176,
+              bottom: 50 + paddingBottomNoKeyboard,
               left: 0,
               right: 0,
               height: insets.top,
@@ -214,20 +215,6 @@ export default function TabOneScreen() {
             }}
             pointerEvents="none"
           />
-          {error ? (
-            <View
-              style={{
-                flex: 1,
-                width: "100%",
-                padding: 12,
-                backgroundColor: "#FF3B30",
-                borderRadius: 8,
-                marginBottom: 8,
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 14 }}>{error}</Text>
-            </View>
-          ) : null}
 
           <PeopleInput
             value={value}

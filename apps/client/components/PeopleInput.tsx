@@ -9,6 +9,7 @@ import {
   VStack,
 } from "@expo/ui/swift-ui";
 import { glassEffect, padding } from "@expo/ui/swift-ui/modifiers";
+import * as Haptics from "expo-haptics";
 
 interface PeopleInputProps {
   value: string;
@@ -72,17 +73,32 @@ export function PeopleInput({
           />
         </VStack>
         <Button
-          systemImage={isRecording || isTranscribing ? undefined : "mic.fill"}
-          variant={isRecording ? "glassProminent" : "glass"}
-          onPress={onVoiceRecording}
-          disabled={isTranscribing || isLoading || hasValue}
+          systemImage={
+            isRecording ? "stop.fill" : isTranscribing ? undefined : "mic.fill"
+          }
+          variant={
+            isRecording
+              ? "glassProminent"
+              : isTranscribing
+                ? "glassProminent"
+                : "glass"
+          }
+          color={isRecording ? "red" : isTranscribing ? "black" : "black"}
+          onPress={() => {
+            Haptics.impactAsync();
+            onVoiceRecording();
+          }}
+          disabled={isTranscribing || isLoading}
         >
-          {(isRecording || isTranscribing) && <CircularProgress color="#fff" />}
+          {isTranscribing && <CircularProgress />}
         </Button>
         <Button
           systemImage={isLoading ? undefined : "arrow.up"}
           variant="glassProminent"
-          onPress={handleSubmit}
+          onPress={() => {
+            Haptics.impactAsync();
+            handleSubmit();
+          }}
           disabled={isRecording || isTranscribing}
         >
           {isLoading && <CircularProgress color="#fff" />}

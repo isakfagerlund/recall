@@ -40,7 +40,8 @@ export function PersonCard({ person }: PersonCardProps) {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
 
-  const { getEventsForTime, hasPermission } = useCalendarEvents();
+  const { getEventsForTime, hasPermission, selectedCalendarIds } =
+    useCalendarEvents();
   const [calendarContext, setCalendarContext] = useState<string | null>(null);
 
   const animatedStyle = useAnimatedStyle(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +18,7 @@ import { people as peopleTable } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { getSyncKey } from "@/lib/sync/key";
 import { performSync } from "@/lib/sync/sync";
+import { CalendarSettingsSection } from "@/components/CalendarSettingsSection";
 
 export default function SettingsScreen() {
   const [syncKey, setSyncKeyState] = useState<string | null>(null);
@@ -123,7 +124,11 @@ export default function SettingsScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: "#D9D9D9" }}
-      contentContainerStyle={{ paddingHorizontal: 14, gap: 16 }}
+      contentContainerStyle={{
+        paddingHorizontal: 14,
+        gap: 16,
+        paddingBottom: 40,
+      }}
     >
       <Text style={{ fontSize: 24, fontWeight: "bold" }}>Settings</Text>
 
@@ -216,20 +221,6 @@ export default function SettingsScreen() {
         </Text>
       )}
 
-      {error && (
-        <View
-          style={{
-            backgroundColor: "#fee",
-            padding: 12,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: "#fcc",
-          }}
-        >
-          <Text style={{ color: "#c00", fontSize: 12 }}>{error}</Text>
-        </View>
-      )}
-
       <Pressable
         onPress={handleSync}
         disabled={isSyncing || isLoading || !syncKey}
@@ -247,6 +238,22 @@ export default function SettingsScreen() {
           <Text style={{ color: "#fff", fontWeight: "700" }}>Sync Now</Text>
         )}
       </Pressable>
+
+      <CalendarSettingsSection />
+
+      {error && (
+        <View
+          style={{
+            backgroundColor: "#fee",
+            padding: 12,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: "#fcc",
+          }}
+        >
+          <Text style={{ color: "#c00", fontSize: 12 }}>{error}</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
