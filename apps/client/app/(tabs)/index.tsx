@@ -34,6 +34,7 @@ export default function TabOneScreen() {
     isRecording,
     isTranscribing,
     error: voiceError,
+    inputLevel,
     startRecording,
     stopRecording,
   } = useVoiceToText();
@@ -124,6 +125,7 @@ export default function TabOneScreen() {
   const handleVoiceRecording = async (): Promise<void> => {
     try {
       setError(""); // Clear any previous errors
+      setValue(""); // Clear old values
       if (isRecording) {
         // Stop recording and transcribe
         const transcribedText = await stopRecording();
@@ -222,6 +224,7 @@ export default function TabOneScreen() {
             isRecording={isRecording}
             isTranscribing={isTranscribing}
             isLoading={isLoading}
+            inputLevel={inputLevel}
             onVoiceRecording={handleVoiceRecording}
             onSubmit={handlePersonSubmit}
           />

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   AudioModule,
   useAudioRecorder,
@@ -38,6 +38,7 @@ interface UseVoiceToTextReturn {
   isRecording: boolean;
   isTranscribing: boolean;
   error: string | null;
+  inputLevel: number; // Normalized 0-1 audio input level
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<string | null>;
   requestPermissions: () => Promise<boolean>;
@@ -47,7 +48,8 @@ export function useVoiceToText(): UseVoiceToTextReturn {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const recorderState = useAudioRecorderState(audioRecorder);
+  // Update metering every 100ms for smooth visualization
+  const recorderState = useAudioRecorderState(audioRecorder, 100);
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
     try {
@@ -84,7 +86,9 @@ export function useVoiceToText(): UseVoiceToTextReturn {
         return;
       }
 
-      await audioRecorder.prepareToRecordAsync();
+      await audioRecorder.prepareToRecordAsync({
+        isMeteringEnabled: true,
+      });
       audioRecorder.record();
     } catch (err) {
       const message =
@@ -157,33 +161,36 @@ export function useVoiceToText(): UseVoiceToTextReturn {
         );
       }
 
-      // Send base64 data directly to the server
-      const apiUrl = getTranscribeApiUrl();
-      const apiKey = getApiKey();
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          audio: base64,
-          format: "m4a",
-        }),
-      });
+      if (!localTranscription) {
+        // Send base64 data directly to the server
+        const apiUrl = getTranscribeApiUrl();
+        const apiKey = getApiKey();
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            audio: base64,
+            format: "m4a",
+          }),
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Transcription failed: ${response.status} ${errorText}`,
-        );
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            `Transcription failed: ${response.status} ${errorText}`,
+          );
+        }
+
+        const result = await response.json();
+        const openAITranscription = result.text ?? null;
+
+        return openAITranscription;
+      } else {
+        return localTranscription;
       }
-
-      const result = await response.json();
-      const openAITranscription = result.text ?? null;
-
-      // Return local transcription if available, otherwise use OpenAI
-      return localTranscription ?? openAITranscription;
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to transcribe audio";
@@ -193,10 +200,27 @@ export function useVoiceToText(): UseVoiceToTextReturn {
     }
   }
 
+  // Normalize metering value to 0-1 range
+  // Metering is typically in dB (negative values), so we normalize it
+  // Typical range: -160dB (silence) to 0dB (max)
+  const inputLevel = useMemo(() => {
+    if (!recorderState.isRecording || recorderState.metering === undefined) {
+      return 0;
+    }
+    // Normalize from dB range (-160 to 0) to 0-1
+    // Clamp and map: -160dB -> 0, 0dB -> 1
+    const normalized = Math.max(
+      0,
+      Math.min(1, (recorderState.metering + 160) / 160),
+    );
+    return normalized;
+  }, [recorderState.isRecording, recorderState.metering]);
+
   return {
     isRecording: recorderState.isRecording,
     isTranscribing,
     error,
+    inputLevel,
     startRecording,
     stopRecording,
     requestPermissions,
