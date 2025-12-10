@@ -21,6 +21,7 @@ interface PeopleInputProps {
   inputLevel: number; // Normalized 0-1 audio input level
   onVoiceRecording: () => Promise<void>;
   onSubmit: () => Promise<void>;
+  keyboardOpen: boolean;
 }
 
 export function PeopleInput({
@@ -32,6 +33,7 @@ export function PeopleInput({
   inputLevel,
   onVoiceRecording,
   onSubmit,
+  keyboardOpen,
 }: PeopleInputProps) {
   const fieldRef = useRef<TextFieldRef>(null);
 
@@ -54,7 +56,12 @@ export function PeopleInput({
 
   return (
     <>
-      {isRecording && <AnimatedSoundBars inputLevel={inputLevel} />}
+      {isRecording && (
+        <AnimatedSoundBars
+          inputLevel={inputLevel}
+          keyboardOpen={keyboardOpen}
+        />
+      )}
       <Host matchContents style={{ width: "100%", zIndex: 3 }}>
         <HStack spacing={12}>
           <VStack
@@ -118,9 +125,13 @@ export function PeopleInput({
 
 interface AnimatedSoundBarsProps {
   inputLevel: number;
+  keyboardOpen: boolean;
 }
 
-const AnimatedSoundBars = ({ inputLevel }: AnimatedSoundBarsProps) => {
+const AnimatedSoundBars = ({
+  inputLevel,
+  keyboardOpen,
+}: AnimatedSoundBarsProps) => {
   const barCount = 32;
   const dotAnimations = useMemo(
     () => Array.from({ length: barCount }).map(() => new Animated.Value(0.3)),
@@ -151,7 +162,17 @@ const AnimatedSoundBars = ({ inputLevel }: AnimatedSoundBarsProps) => {
   }, [inputLevel]);
 
   return (
-    <View style={styles.waveformContainer}>
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        minWidth: 120,
+        position: "absolute",
+        bottom: keyboardOpen ? 77 : 109,
+        left: 10,
+        zIndex: 4,
+      }}
+    >
       <View style={styles.waveformRow}>
         {dotAnimations.map((animation, index) => {
           return (
@@ -176,15 +197,6 @@ const AnimatedSoundBars = ({ inputLevel }: AnimatedSoundBarsProps) => {
 };
 
 const styles = StyleSheet.create({
-  waveformContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    minWidth: 120,
-    position: "absolute",
-    bottom: 109,
-    left: 10,
-    zIndex: 4,
-  },
   waveformRow: {
     flexDirection: "row",
     alignItems: "center",

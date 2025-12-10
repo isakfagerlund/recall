@@ -80,7 +80,6 @@ export function useVoiceToText(): UseVoiceToTextReturn {
   const startRecording = useCallback(async (): Promise<void> => {
     try {
       setError(null);
-      Keyboard.dismiss();
       const hasPermission = await requestPermissions();
       if (!hasPermission) {
         return;

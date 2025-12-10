@@ -3,13 +3,7 @@ import React, { useEffect, useState } from "react";
 import { apple } from "@react-native-ai/apple";
 import { generateObject } from "ai";
 import { generatePersonSchema, Person } from "@/types/person";
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  TextInput,
-} from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform } from "react-native";
 import { useVoiceToText } from "@/components/useVoiceToText";
 import { KeyboardToolbar } from "react-native-keyboard-controller";
 import * as Crypto from "expo-crypto";
@@ -209,7 +203,9 @@ export default function TabOneScreen() {
             colors={["rgba(217, 217, 217, 0)", "#D9D9D9"]}
             style={{
               position: "absolute",
-              bottom: 50 + paddingBottomNoKeyboard,
+              bottom: keyboardOpen
+                ? 20 + paddingBottomNoKeyboard
+                : 50 + paddingBottomNoKeyboard,
               left: 0,
               right: 0,
               height: insets.top,
@@ -227,6 +223,7 @@ export default function TabOneScreen() {
             inputLevel={inputLevel}
             onVoiceRecording={handleVoiceRecording}
             onSubmit={handlePersonSubmit}
+            keyboardOpen={keyboardOpen}
           />
         </View>
       </KeyboardAvoidingView>
